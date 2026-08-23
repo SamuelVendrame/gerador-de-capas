@@ -138,11 +138,12 @@ const props = defineProps<{
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: flex-end;
   text-align: right;
   padding: 80px;
   box-sizing: border-box;
 }
+
 .direita .linha { margin-left: auto; }
 </style>
