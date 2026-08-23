@@ -22,3 +22,7 @@ logs
 .env
 .env.*
 !.env.example
+
+# para nao acumular arquivos gerados em testes
+
+public/renders/
