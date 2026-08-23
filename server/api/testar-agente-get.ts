@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const resultado = await rodarAgente({
     titulo: "O Vale Esquecido",
     autor: "Ana Silva",
-    tema: "fantasia épica",
+    tema: "ficção científica com cowboys que laceiam e montam em dinossauros",
   });
 
   return resultado;

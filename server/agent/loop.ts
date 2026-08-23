@@ -2,16 +2,19 @@ import { chamarLLM, type Mensagem } from "./llm";
 import { TOOLS, executarTool } from "./tools";
 
 const MAX_TENTATIVAS = 3;
-let ultimaImagemGerada: string | null = null;
 
-export async function rodarAgente(dadosDoLivro: {
-  titulo: string;
-  autor: string;
-  tema: string;
-}) {
+export async function rodarAgente(
+  dadosDoLivro: {
+    titulo: string;
+    autor: string;
+    tema: string;
+  },
+  historicoInicial?: Mensagem[] // opcional — só usado por testes
+) {
   let tentativas = 0;
+  let ultimaImagemGerada: string | null = null;
 
-  const historico: Mensagem[] = [
+  const historico: Mensagem[] = historicoInicial ?? [
     {
       role: "system",
       content:
@@ -46,7 +49,7 @@ export async function rodarAgente(dadosDoLivro: {
           ultimaImagemGerada = url;
         } else if (call.function.name === "renderizarCapa") {
           if (ultimaImagemGerada) {
-            args.imagemUrl = ultimaImagemGerada; // força a URL real, ignora o que o modelo mandou
+            args.imagemUrl = ultimaImagemGerada;
           }
           url = await executarTool(call.function.name, args);
         } else {
@@ -68,6 +71,7 @@ export async function rodarAgente(dadosDoLivro: {
         });
       }
     }
+
     tentativas++;
   }
 
