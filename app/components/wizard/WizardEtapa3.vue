@@ -1,9 +1,5 @@
 <script setup lang="ts">
-const descricao = defineModel<string>("descricao", { required: true });
-
-defineProps<{
-  erros: Record<string, string>;
-}>();
+    const descricao = defineModel<string>("descricao", { required: true });
 </script>
 
 <template>
@@ -15,7 +11,6 @@ defineProps<{
       <label for="descricao">Descrição breve</label>
       <textarea id="descricao" v-model="descricao" rows="4" />
       <span class="dica">Duas ou três frases bastam — é daqui que sai o prompt da arte.</span>
-      <span v-if="erros.descricao" class="erro">{{ erros.descricao }}</span>
     </div>
   </div>
 </template>
@@ -27,5 +22,4 @@ defineProps<{
 label { font-weight: 600; }
 textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; resize: vertical; }
 .dica { color: #999; font-size: 13px; }
-.erro { color: #c00; font-size: 14px; }
 </style>

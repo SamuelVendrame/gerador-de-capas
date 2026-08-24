@@ -1,0 +1,42 @@
+[
+  {
+    "id": "92692255-8f40-4b4c-aef0-aa6a7fa15355",
+    "titulo": "Livro de Teste",
+    "autor": "Autor Fictício",
+    "status": "concluido",
+    "caminhoImagem": "/renders/fake.png",
+    "criadoEm": "2026-08-24T18:51:55.973Z"
+  },
+  {
+    "id": "2c851ced-3ae6-4609-b7ea-b78201322656",
+    "titulo": "Livro de Teste",
+    "autor": "Autor Fictício",
+    "status": "concluido",
+    "caminhoImagem": "/renders/fake.png",
+    "criadoEm": "2026-08-24T18:51:50.175Z"
+  },
+  {
+    "id": "df75cbc6-c186-4940-b9ad-68c8d7e9c5bd",
+    "titulo": "Livro de Teste",
+    "autor": "Autor Fictício",
+    "status": "concluido",
+    "caminhoImagem": "/renders/fake.png",
+    "criadoEm": "2026-08-24T18:51:28.137Z"
+  },
+  {
+    "id": "ef1aeda7-e287-42ba-ad5e-7ba16e220033",
+    "titulo": "Livro de Teste",
+    "autor": "Autor Fictício",
+    "status": "concluido",
+    "caminhoImagem": "/renders/fake.png",
+    "criadoEm": "2026-08-24T18:51:23.816Z"
+  },
+  {
+    "id": "ca07e83b-28fb-4569-a853-74c6b08bd735",
+    "titulo": "Livro de Teste",
+    "autor": "Autor Fictício",
+    "status": "concluido",
+    "caminhoImagem": "/renders/fake.png",
+    "criadoEm": "2026-08-24T18:51:21.327Z"
+  }
+]

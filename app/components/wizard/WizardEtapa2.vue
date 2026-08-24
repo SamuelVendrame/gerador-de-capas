@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { GENEROS } from "~~/shared/schemas";
+import { GENEROS } from "~~/shared/schemasGeneros";
 
 const genero = defineModel<string>("genero", { required: true });
 
-defineProps<{
-  erros: Record<string, string>;
-}>();
 </script>
 
 <template>
@@ -25,7 +22,6 @@ defineProps<{
         <span class="opcao-descricao">{{ g.descricao }}</span>
       </label>
     </div>
-    <span v-if="erros.genero" class="erro">{{ erros.genero }}</span>
   </div>
 </template>
 
@@ -44,5 +40,4 @@ defineProps<{
 .opcao.selecionado { border-color: #7c3aed; background: #f5f0ff; }
 .opcao-label { font-weight: 600; }
 .opcao-descricao { color: #666; font-size: 13px; }
-.erro { color: #c00; font-size: 14px; }
 </style>
