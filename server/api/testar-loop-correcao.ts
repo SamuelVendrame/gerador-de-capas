@@ -2,6 +2,12 @@ import { rodarAgente } from "../agent/loop";
 import type { Mensagem } from "../agent/llm";
 
 export default defineEventHandler(async (event) => {
+  const dadosDoLivro = {
+    titulo: "Teste de Correção Teste de Correção Teste de Correção Teste de Correção Teste de Correção Teste de Correção",
+    autor: "Autor Teste",
+    tema: "Fantasia, com grandes colinas e um castelo branco com telhados roxos, tendo um dragao vermelho voando aos fundos",
+  };
+
   const historicoSimulado: Mensagem[] = [
     {
       role: "system",
@@ -12,8 +18,7 @@ export default defineEventHandler(async (event) => {
     },
     {
       role: "user",
-      content: `Gere uma capa para o livro "Teste de Correção" de Autor Teste. Tema: teste`,
-    },
+      content: `Gere uma capa para o livro "${dadosDoLivro.titulo}" de ${dadosDoLivro.autor}. Tema: ${dadosDoLivro.tema}. Use o layout "faixa".`,    },
     {
       role: "assistant",
       content: null as any,
@@ -40,10 +45,7 @@ export default defineEventHandler(async (event) => {
     },
   ];
 
-  const resultado = await rodarAgente(
-    { titulo: "Teste de Correção", autor: "Autor Teste", tema: "teste" },
-    historicoSimulado
-  );
+  const resultado = await rodarAgente(dadosDoLivro, historicoSimulado);
 
   return resultado;
 });

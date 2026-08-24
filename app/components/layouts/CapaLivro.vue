@@ -67,8 +67,8 @@
 
 <style scoped>
   .capa {
-    width: 1200px;
-    height: 1800px;
+    width: 1600px;
+    height: 2400px;
     background-size: cover;
     background-position: center;
     position: relative;
@@ -83,6 +83,7 @@
     line-height: 1.15;
     margin: 0;
     overflow-wrap: break-word;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
   }
 
   .autor {
@@ -90,6 +91,7 @@
     font-weight: 600;
     letter-spacing: 0.15em;
     margin: 0;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
   }
 
   .linha {
