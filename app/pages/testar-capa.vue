@@ -15,7 +15,7 @@ const imagemTeste = "https://picsum.photos/seed/capa/1200/1800";
         :layout="layout"
         fonte="Space Grotesk"
         :imagem-url="imagemTeste"
-        titulo="O Silêncio Entre as Marés"
+        titulo="A Longa Jornada Através das Montanhas Esquecidas do Norte"
         autor="Helena Vasques"
       />
     </div>
