@@ -27,27 +27,27 @@ const response = await fetch(OPENROUTER_URL, {
         model: MODELO,
         messages: historico,
         tools,
-    }),
-});
+        }),
+    });
 
-const textoResposta = await response.text();
+    const textoResposta = await response.text();
 
-if (!response.ok) {
-    throw new Error(`OpenRouter retornou HTTP ${response.status}: ${textoResposta}`);
-}
+    if (!response.ok) {
+        throw new Error(`OpenRouter retornou HTTP ${response.status}: ${textoResposta}`);
+    }
 
-let data;
-try {
-    data = JSON.parse(textoResposta);
-} catch (err) {
-    throw new Error(`A API não retornou um JSON válido. Conteúdo bruto recebido:\n${textoResposta}`);
-}
+    let data;
+    try {
+        data = JSON.parse(textoResposta);
+    } catch (err) {
+        throw new Error(`A API não retornou um JSON válido. Conteúdo bruto recebido:\n${textoResposta}`);
+    }
 
-const escolha = data.choices?.[0];
-    if (!escolha) {
-        console.error("[chamarLLM] Resposta completa sem choices:", JSON.stringify(data, null, 2));
-        throw new Error(`Resposta do OpenRouter sem 'choices'. Resposta completa: ${JSON.stringify(data)}`);
-}
+    const escolha = data.choices?.[0];
+        if (!escolha) {
+            console.error("[chamarLLM] Resposta completa sem choices:", JSON.stringify(data, null, 2));
+            throw new Error(`Resposta do OpenRouter sem 'choices'. Resposta completa: ${JSON.stringify(data)}`);
+    }
 
     return escolha.message as Mensagem;
 }

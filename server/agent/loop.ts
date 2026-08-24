@@ -9,8 +9,8 @@ export async function rodarAgente(
     autor: string;
     tema: string;
   },
-  historicoInicial?: Mensagem[] // opcional — só usado por testes
-) {
+
+  historicoInicial?: Mensagem[]) {
   let tentativas = 0;
   let ultimaImagemGerada: string | null = null;
 
@@ -29,7 +29,16 @@ export async function rodarAgente(
   ];
 
   while (tentativas < MAX_TENTATIVAS) {
-    const resposta = await chamarLLM(historico, TOOLS);
+    let resposta: Mensagem;
+
+    try {
+      resposta = await chamarLLM(historico, TOOLS);
+    } catch (err) {
+      const mensagemErro = err instanceof Error ? err.message : String(err);
+      console.error("Erro ao chamar a LLM:", mensagemErro);
+      return { sucesso: false, erro: mensagemErro, historico };
+    }
+
     historico.push(resposta);
 
     const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
@@ -70,6 +79,12 @@ export async function rodarAgente(
           ],
         });
       }
+    } else {
+      console.warn("Modelo respondeu sem aprovar e sem chamar tool:", respostaTexto);
+      historico.push({
+        role: "system",
+        content: "Você precisa aprovar respondendo 'APROVADO' ou chamar uma das ferramentas disponíveis. Não pare no meio.",
+      });
     }
 
     tentativas++;
