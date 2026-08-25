@@ -3,8 +3,9 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useGeracaoProgresso } from "~/composables/useGeracaoProgresso";
 
+
 const router = useRouter();
-const { passos, finalizado, sucesso, caminhoImagem, iniciar } = useGeracaoProgresso();
+const { passos, finalizado, sucesso, caminhoImagem, iniciar, idGeracao } = useGeracaoProgresso();
 const dadosLivro = ref<{ titulo?: string; genero?: string }>({});
 
 onMounted(() => {
@@ -12,10 +13,6 @@ onMounted(() => {
   dadosLivro.value = dados;
   iniciar(dados);
 });
-
-function verResultado() {
-  router.push("/");
-}
 
 function verResultado() {
   router.push(`/capa/${idGeracao.value}`);
@@ -93,21 +90,6 @@ function verResultado() {
 </template>
 
 <style scoped>
-.pagina {
-  min-height: 100vh;
-  width: 100%;
-  padding: 40px 20px;
-  box-sizing: border-box;
-}
-.card-central {
-  max-width: 900px;
-  margin: 0 auto;
-  background: var(--cor-branco, white);
-  border-radius: var(--raio-card, 10px);
-  box-shadow: var(--sombra-card, 0 1px 4px rgba(0, 0, 0, 0.06));
-  padding: 24px;
-}
-
 .tela-progresso { display: flex; gap: 32px; }
 .coluna-esquerda { flex: 1.2; }
 .coluna-direita { flex: 1; }
