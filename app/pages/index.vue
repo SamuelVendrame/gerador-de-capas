@@ -151,6 +151,6 @@ body {
 
 .conteudo {
   padding: 24px;
-  background-color: #f1f1f1;
+  background-color: #f7f7f7;
 }
 </style>
