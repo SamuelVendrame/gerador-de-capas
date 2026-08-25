@@ -3,7 +3,8 @@ import { ref } from "vue";
 import { useDetalheCapa } from "~/composables/useDetalheCapa";
 
 const props = defineProps<{
-  registro: any; // RegistroHistorico
+  registro: any;
+  mostrarVoltar?: boolean;
 }>();
 
 const emit = defineEmits<{ fechar: [] }>();
@@ -21,12 +22,16 @@ async function aplicarTrocaLayout() {
 
 <template>
   <div class="detalhe-capa">
-    <button class="btn-voltar" @click="emit('fechar')">← Voltar ao histórico</button>
+    <button v-if="mostrarVoltar !== false" class="btn-voltar" @click="emit('fechar')">← Voltar ao histórico</button>
+
+    <div class="cabecalho-resultado">
+      <span class="pill-aprovado">Aprovada pelo agente</span>
+    </div>
 
     <img v-if="registro.caminhoImagem" :src="registro.caminhoImagem" class="imagem-grande" alt="Capa gerada" />
 
     <h2>{{ registro.titulo }}</h2>
-    <p class="autor">{{ registro.autor }}</p>
+    <p class="autor">{{ registro.autor }} · {{ registro.genero }}</p>
 
     <div class="resumo-processo">
       <h3>Resumo do processo</h3>
@@ -44,6 +49,12 @@ async function aplicarTrocaLayout() {
           <span>tempo total</span>
         </div>
       </div>
+    </div>
+
+    <div v-if="registro.logProcesso?.length" class="log-processo">
+      <p v-for="(evento, i) in registro.logProcesso" :key="i" class="linha-log">
+        {{ evento.comentario }}
+      </p>
     </div>
 
     <div v-if="registro.layoutMotivo || registro.fonteMotivo || registro.avaliacaoArte" class="decisoes-agente">
@@ -86,18 +97,36 @@ async function aplicarTrocaLayout() {
 
 <style scoped>
 .detalhe-capa { display: flex; flex-direction: column; gap: 16px; }
-.btn-voltar { align-self: flex-start; background: none; border: none; color: #7c3aed; cursor: pointer; font-size: 14px; }
+.btn-voltar { align-self: flex-start; background: none; border: none; color: var(--cor-primaria, #7c3aed); cursor: pointer; font-size: 14px; }
+
+.pill-aprovado {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .imagem-grande { width: 100%; max-width: 300px; border-radius: 8px; align-self: center; }
 .autor { color: #666; }
+
 .resumo-processo, .decisoes-agente, .ajuste-manual { background: white; padding: 16px; border-radius: 8px; }
 .estatisticas { display: flex; gap: 24px; margin-top: 8px; }
 .estatistica { display: flex; flex-direction: column; align-items: center; }
-.estatistica strong { font-size: 20px; color: #7c3aed; }
+.estatistica strong { font-size: 20px; color: var(--cor-primaria, #7c3aed); }
 .estatistica span { font-size: 12px; color: #999; }
+
+.log-processo { display: flex; flex-direction: column; gap: 8px; }
+.linha-log { font-size: 13px; color: #666; padding: 8px 12px; background: #f9f9f9; border-radius: 6px; margin: 0; }
+
 .decisoes-agente p { margin: 8px 0; font-size: 14px; }
+
 .acoes { display: flex; gap: 8px; }
-.btn-acao { padding: 8px 16px; background: #f5f0ff; color: #7c3aed; border: none; border-radius: 6px; cursor: pointer; }
+.btn-acao { padding: 8px 16px; background: #f5f0ff; color: var(--cor-primaria, #7c3aed); border: none; border-radius: 6px; cursor: pointer; }
+
 .nota { font-size: 12px; color: #999; margin: 0 0 12px; }
 .ajuste-manual select { margin-right: 8px; padding: 6px; }
-.btn-aplicar { padding: 6px 14px; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 8px; }
+.btn-aplicar { padding: 6px 14px; background: var(--cor-primaria, #7c3aed); color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 8px; }
 </style>

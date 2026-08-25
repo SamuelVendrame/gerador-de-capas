@@ -10,6 +10,7 @@ export type EventoProgresso = {
   comentario: string;
   duracaoSegundos: number;
   caminhoImagem?: string;
+  ehCorrecao?: boolean;
 };
 
 export const LIMITE_TENTATIVAS_IMAGEM = 3;

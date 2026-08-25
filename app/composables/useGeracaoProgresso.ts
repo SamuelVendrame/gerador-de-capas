@@ -7,24 +7,6 @@ export type PassoProgresso = {
   status: "sucesso" | "erro";
 };
 
-function inferirStatus(comentario: string): "sucesso" | "erro" {
-  const indicadoresErro = [
-    "detectei",
-    "corrigindo",
-    "erro",
-    "não foi possível",
-    "ajustando",
-  ];
-
-  const textoBaixo = comentario.toLowerCase();
-
-  return indicadoresErro.some((indicador) =>
-    textoBaixo.includes(indicador)
-  )
-    ? "erro"
-    : "sucesso";
-}
-
 export function useGeracaoProgresso() {
   const passos = ref<PassoProgresso[]>([]);
   const finalizado = ref(false);
@@ -32,71 +14,43 @@ export function useGeracaoProgresso() {
   const caminhoImagem = ref<string | null>(null);
   const motivo = ref<string | null>(null);
   const erroFatal = ref<string | null>(null);
+  const idGeracao = ref<string | null>(null); // 1) declarado no topo, junto dos outros refs
 
-  async function iniciar(dados: unknown) {
-    passos.value = [];
-    finalizado.value = false;
-    sucesso.value = null;
-    caminhoImagem.value = null;
-    motivo.value = null;
-    erroFatal.value = null;
-
+  async function iniciar(dados: any) {
     try {
       const response = await fetch("/api/gerar-capa-stream", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dados),
       });
 
-      if (!response.ok) {
-        throw new Error(
-          `Erro HTTP ${response.status}: ${response.statusText}`
-        );
-      }
-
       const reader = response.body?.getReader();
-
-      if (!reader) {
-        throw new Error("O navegador não conseguiu iniciar o streaming.");
-      }
-
       const decoder = new TextDecoder();
+      if (!reader) return;
+
       let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
-
-        if (done) {
-          break;
-        }
+        if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
 
         const eventosCompletos = buffer.split("\n\n");
-
         buffer = eventosCompletos.pop() ?? "";
 
-        for (const evento of eventosCompletos) {
-          const linha = evento.trim();
-
-          if (!linha.startsWith("data: ")) {
-            continue;
-          }
+        for (const linha of eventosCompletos) {
+          if (!linha.startsWith("data: ")) continue;
 
           try {
-            const conteudo = linha.slice(6);
-            const dado = JSON.parse(conteudo);
+            const dado = JSON.parse(linha.replace("data: ", ""));
 
-            if (dado.tipo === "passo") {
-              const ultimoPasso =
-                passos.value[passos.value.length - 1];
+            if (dado.tipo === "iniciado") {
+              idGeracao.value = dado.id; // 2) captura o id assim que a geração começa
+            } else if (dado.tipo === "passo") {
+              const ultimoPasso = passos.value[passos.value.length - 1];
 
-              if (
-                dado.caminhoImagem &&
-                ultimoPasso?.titulo === dado.titulo
-              ) {
+              if (dado.caminhoImagem && ultimoPasso?.titulo === dado.titulo) {
                 caminhoImagem.value = dado.caminhoImagem;
                 continue;
               }
@@ -105,7 +59,7 @@ export function useGeracaoProgresso() {
                 titulo: dado.titulo,
                 comentario: dado.comentario,
                 duracaoSegundos: dado.duracaoSegundos,
-                status: inferirStatus(dado.comentario),
+                status: dado.ehCorrecao ? "erro" : "sucesso",
               };
 
               passos.value.push(passo);
@@ -121,47 +75,19 @@ export function useGeracaoProgresso() {
             } else if (dado.tipo === "erro") {
               finalizado.value = true;
               sucesso.value = false;
-              erroFatal.value =
-                dado.mensagem ?? "Erro desconhecido durante a geração.";
+              erroFatal.value = dado.mensagem;
             }
           } catch (erroParse) {
-            console.error(
-              "Falha ao parsear evento SSE:",
-              erroParse,
-              evento
-            );
+            console.error("Falha ao parsear evento SSE:", erroParse, linha);
           }
-        }
-      }
-
-      // Caso o servidor encerre o stream sem mandar concluído/erro
-      if (!finalizado.value) {
-        finalizado.value = true;
-
-        if (sucesso.value === null) {
-          sucesso.value = false;
         }
       }
     } catch (erro) {
       console.error("Erro na conexão de streaming:", erro);
-
-      erroFatal.value =
-        erro instanceof Error
-          ? erro.message
-          : "Erro desconhecido";
-
+      erroFatal.value = erro instanceof Error ? erro.message : "Erro desconhecido";
       finalizado.value = true;
-      sucesso.value = false;
     }
   }
 
-  return {
-    passos,
-    finalizado,
-    sucesso,
-    caminhoImagem,
-    motivo,
-    erroFatal,
-    iniciar,
-  };
+  return { passos, finalizado, sucesso, caminhoImagem, motivo, erroFatal, idGeracao, iniciar }; // 3) idGeracao exposto no return
 }

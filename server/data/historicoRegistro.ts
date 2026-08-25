@@ -30,7 +30,7 @@ export async function registrarSucesso(id: string, resultado: any, ultimaImagem:
 
   const avaliacao = parseAvaliacao(ultimaMensagemTexto);
 
-  await atualizarRegistro(id, {
+    await atualizarRegistro(id, {
     status: "concluido",
     caminhoImagem: ultimaImagem,
     layout: resultado.layout,
@@ -38,6 +38,7 @@ export async function registrarSucesso(id: string, resultado: any, ultimaImagem:
     tentativasImagem: resultado.tentativasImagem,
     ajustesAgente: resultado.ajustesAgente,
     duracaoSegundos: resultado.duracaoSegundos,
+    logProcesso: resultado.logEventos,
     ...avaliacao,
   });
 }

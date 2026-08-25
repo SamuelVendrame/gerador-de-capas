@@ -16,6 +16,11 @@ onMounted(() => {
 function verResultado() {
   router.push("/");
 }
+
+function verResultado() {
+  router.push(`/capa/${idGeracao.value}`);
+}
+
 </script>
 
 <template>

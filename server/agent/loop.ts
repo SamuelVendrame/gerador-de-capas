@@ -29,17 +29,18 @@ function montarResultado(
   historico: Mensagem[],
   metricas: MetricasRodada,
   inicio: number,
-  motivoFalha?: string
+  motivoFalha?: string,
+  logEventos?: EventoProgresso[]
 ) {
   const duracaoSegundos = (Date.now() - inicio) / 1000;
   return {
-    sucesso,
-    historico,
+    sucesso, historico,
     tentativasImagem: metricas.tentativasImagem,
     ajustesAgente: metricas.ajustesAgente,
     duracaoSegundos,
     layout: metricas.layoutFinal,
     fonte: metricas.fonteFinal,
+    logEventos: logEventos ?? [],
     ...(motivoFalha !== undefined ? { motivoFalha } : {}),
   };
 }
@@ -53,6 +54,12 @@ export async function rodarAgente(
   let iteracoes = 0;
   const ultimaImagemGeradaRef = { valor: null as string | null };
   const metricas: MetricasRodada = { tentativasImagem: 0, ajustesAgente: 0 };
+  const logEventos: EventoProgresso[] = []; 
+
+  function emitirEvento(evento: EventoProgresso) {
+    logEventos.push(evento);
+    onProgresso?.(evento);
+  }
 
   const historico: Mensagem[] = historicoInicial ?? [
     { role: "system", content: PROMPT_SISTEMA },
@@ -74,7 +81,7 @@ export async function rodarAgente(
         continue;
       }
       const nota = respostaTexto.match(/Nota da autorrevisão:\s*([\d.,]+)/i)?.[1] ?? "—";
-      onProgresso?.({ titulo: "Capa aprovada pelo agente", comentario: `Nota da autorrevisão: ${nota}`, duracaoSegundos: duracaoEtapa });
+      emitirEvento?.({ titulo: "Capa aprovada pelo agente", comentario: `Nota da autorrevisão: ${nota}`, duracaoSegundos: duracaoEtapa });
       return montarResultado(true, historico, metricas, inicio);
     }
 
@@ -82,7 +89,7 @@ export async function rodarAgente(
       ? rotularEtapa(resposta.tool_calls[0].function.name)
       : "Revisando o resultado";
 
-    onProgresso?.({ titulo: tituloEtapa, comentario: resumirComentario(respostaTexto), duracaoSegundos: duracaoEtapa });
+    emitirEvento({ titulo: tituloEtapa, comentario: resumirComentario(respostaTexto), duracaoSegundos: duracaoEtapa });
 
       if (respostaTexto.startsWith("APROVADO")) {
         if (metricas.ajustesAgente === 0) {
@@ -91,7 +98,7 @@ export async function rodarAgente(
         }
 
         const nota = respostaTexto.match(/Nota da autorrevisão:\s*([\d.,]+)/i)?.[1] ?? "—";
-        onProgresso?.({
+        emitirEvento?.({
           titulo: "Capa aprovada pelo agente",
           comentario: `Nota da autorrevisão: ${nota}`,
           duracaoSegundos: duracaoEtapa,
@@ -101,24 +108,27 @@ export async function rodarAgente(
       }
 
       if (resposta.tool_calls && resposta.tool_calls.length > 0) {
-          const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
+        const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
+        const detalheAtual = detalhes[0];
 
-          const detalheAtual = detalhes[0];
-          let comentarioFinal = resumirComentario(respostaTexto);
+        let comentarioFinal = resumirComentario(respostaTexto);
+        let ehCorrecao = false;
 
-          if (detalheAtual?.nomeTool === "gerarImagem") {
-            comentarioFinal = `Prompt: "${detalheAtual.argumentos.prompt}"`;
-          } else if (detalheAtual?.nomeTool === "renderizarCapa") {
-            comentarioFinal = `Layout: ${detalheAtual.argumentos.layout} · Fonte: ${detalheAtual.argumentos.fonte}`;
-          }
-
-          onProgresso?.({
-            titulo: tituloEtapa,
-            comentario: comentarioFinal,
-            duracaoSegundos: duracaoEtapa,
-            caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
-          });
+        if (detalheAtual?.nomeTool === "gerarImagem") {
+          comentarioFinal = `Prompt: "${detalheAtual.argumentos.prompt}"`;
+          ehCorrecao = metricas.tentativasImagem > 1;
+        } else if (detalheAtual?.nomeTool === "renderizarCapa") {
+          comentarioFinal = `Layout: ${detalheAtual.argumentos.layout} · Fonte: ${detalheAtual.argumentos.fonte}`;
+          ehCorrecao = metricas.ajustesAgente > 1;
         }
+
+      emitirEvento({          titulo: tituloEtapa,
+          comentario: comentarioFinal,
+          duracaoSegundos: duracaoEtapa,
+          caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
+          ehCorrecao,
+        })
+      }
 
       iteracoes++;
     }
