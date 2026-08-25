@@ -17,18 +17,19 @@ export async function chamarLLM(historico: Mensagem[], tools: any): Promise<Mens
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error("OPENROUTER_API_KEY não configurada no .env");
 
-const response = await fetch(OPENROUTER_URL, {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-        model: MODELO,
-        messages: historico,
-        tools,
-        }),
-    });
+    const response = await fetch(OPENROUTER_URL, {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+            model: MODELO,
+            messages: historico,
+            tools,
+            max_tokens: 1024
+            }),
+        });
 
     const textoResposta = await response.text();
 

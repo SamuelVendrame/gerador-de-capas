@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const GENEROS = [
-  { valor: "romance", label: "Romance", descricao: "Drama, literário, memórias" },
-  { valor: "tecnico", label: "Técnico", descricao: "Engenharia, dados, manuais" },
-  { valor: "infantil", label: "Infantil", descricao: "Histórias para crianças" },
-  { valor: "fantasia", label: "Fantasia", descricao: "Épico, mito, ficção especulativa" },
-  { valor: "negocios", label: "Negócios", descricao: "Gestão, carreira, autoridade" },
+  { valor: "Romance", label: "Romance", descricao: "Drama, literário, memórias" },
+  { valor: "Técnico", label: "Técnico", descricao: "Engenharia, dados, manuais" },
+  { valor: "Infantil", label: "Infantil", descricao: "Histórias para crianças" },
+  { valor: "Fantasia", label: "Fantasia", descricao: "Épico, mito, ficção especulativa" },
+  { valor: "Negocios", label: "Negócios", descricao: "Gestão, carreira, autoridade" },
 ] as const;
 
 const VALORES_GENERO = GENEROS.map((g) => g.valor) as [string, ...string[]];

@@ -72,17 +72,15 @@ body {
 .pagina {
   min-height: 100vh;
   width: 100%;
-  background: #e8e5e8; /* rosa/roxo bem leve */
-  display: flex;
-  justify-content: center;
+  background: #fdf2f8;
   padding: 40px 20px;
   box-sizing: border-box;
+ 
 }
 
 .card-central {
-  max-width: 600px;
   width: 100%;
-  height: fit-content;
+  max-width: none;
   background: white;
   border-radius: 12px;
   overflow: hidden;

@@ -30,6 +30,6 @@ defineProps<{
   transition: background 0.3s;
 }
 .segmento.preenchido {
-  background: #7c3aed; /* roxo */
+  background: #7c3aed;
 }
 </style>

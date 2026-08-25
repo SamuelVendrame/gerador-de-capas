@@ -3,16 +3,28 @@ import { TOOLS, executarTool } from "./tools";
 
 const MAX_TENTATIVAS = 3;
 
-export async function rodarAgente(
-  dadosDoLivro: {
-    titulo: string;
-    autor: string;
-    tema: string;
-  },
+// componentizar
+function extrairUltimaRespostaTexto(historico: Mensagem[]): string | undefined {
+  for (let i = historico.length - 1; i >= 0; i--) {
+    const msg = historico[i];
+    if (msg?.role === "assistant" && typeof msg.content === "string" && msg.content.trim()) {
+      return msg.content;
+    }
+  }
+  return undefined;
+}
 
-  historicoInicial?: Mensagem[]) {
+export async function rodarAgente(
+  dadosDoLivro: { titulo: string; autor: string; tema: string },
+  historicoInicial?: Mensagem[]
+) {
+  const inicio = Date.now();
   let tentativas = 0;
   let ultimaImagemGerada: string | null = null;
+  let tentativasImagem = 0;
+  let ajustesAgente = 0;
+  let layoutFinal: string | undefined;
+  let fonteFinal: string | undefined;
 
   const historico: Mensagem[] = historicoInicial ?? [
     {
@@ -28,68 +40,57 @@ export async function rodarAgente(
     },
   ];
 
-  while (tentativas < MAX_TENTATIVAS) {
-    let resposta: Mensagem;
+  try {
+    while (tentativas < MAX_TENTATIVAS) {
+      const resposta = await chamarLLM(historico, TOOLS);
+      historico.push(resposta);
 
-    try {
-      resposta = await chamarLLM(historico, TOOLS);
-    } catch (err) {
-      const mensagemErro = err instanceof Error ? err.message : String(err);
-      console.error("Erro ao chamar a LLM:", mensagemErro);
-      return { sucesso: false, erro: mensagemErro, historico };
-    }
+      const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
 
-    historico.push(resposta);
-
-    const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
-
-    if (respostaTexto.startsWith("APROVADO")) {
-      console.log("Capa aprovada:", respostaTexto);
-      return { sucesso: true, historico };
-    }
-
-    if (resposta.tool_calls && resposta.tool_calls.length > 0) {
-      for (const call of resposta.tool_calls) {
-        const args = JSON.parse(call.function.arguments);
-        let url: string;
-
-        if (call.function.name === "gerarImagem") {
-          url = await executarTool(call.function.name, args);
-          ultimaImagemGerada = url;
-        } else if (call.function.name === "renderizarCapa") {
-          if (ultimaImagemGerada) {
-            args.imagemUrl = ultimaImagemGerada;
-          }
-          url = await executarTool(call.function.name, args);
-        } else {
-          throw new Error(`Ferramenta desconhecida: ${call.function.name}`);
-        }
-
-        historico.push({
-          role: "tool",
-          tool_call_id: call.id,
-          content: `${call.function.name} executado com sucesso.`,
-        });
-
-        historico.push({
-          role: "user",
-          content: [
-            { type: "text", text: `Aqui está o resultado de ${call.function.name}, analise:` },
-            { type: "image_url", image_url: { url } },
-          ],
-        });
+      if (respostaTexto.startsWith("APROVADO")) {
+        const duracaoSegundos = (Date.now() - inicio) / 1000;
+        return { sucesso: true, historico, tentativasImagem, ajustesAgente, duracaoSegundos, layout: layoutFinal, fonte: fonteFinal };
       }
-    } else {
-      console.warn("Modelo respondeu sem aprovar e sem chamar tool:", respostaTexto);
-      historico.push({
-        role: "system",
-        content: "Você precisa aprovar respondendo 'APROVADO' ou chamar uma das ferramentas disponíveis. Não pare no meio.",
-      });
+
+      if (resposta.tool_calls && resposta.tool_calls.length > 0) {
+        for (const call of resposta.tool_calls) {
+          const args = JSON.parse(call.function.arguments);
+          let url: string;
+
+          if (call.function.name === "gerarImagem") {
+            tentativasImagem++;
+            url = await executarTool(call.function.name, args);
+            ultimaImagemGerada = url;
+          } else if (call.function.name === "renderizarCapa") {
+            ajustesAgente++;
+            layoutFinal = args.layout;
+            fonteFinal = args.fonte;
+            if (ultimaImagemGerada) args.imagemUrl = ultimaImagemGerada;
+            url = await executarTool(call.function.name, args);
+          } else {
+            throw new Error(`Ferramenta desconhecida: ${call.function.name}`);
+          }
+
+          historico.push({ role: "tool", tool_call_id: call.id, content: `${call.function.name} executado com sucesso.` });
+          historico.push({
+            role: "user",
+            content: [
+              { type: "text", text: `Aqui está o resultado de ${call.function.name}, analise:` },
+              { type: "image_url", image_url: { url } },
+            ],
+          });
+        }
+      }
+      tentativas++;
     }
 
-    tentativas++;
+   const duracaoSegundos = (Date.now() - inicio) / 1000;
+   const ultimaResposta = extrairUltimaRespostaTexto(historico);
+   return { sucesso: false, historico, tentativasImagem, ajustesAgente, duracaoSegundos, layout: layoutFinal, fonte: fonteFinal, motivoFalha: ultimaResposta };
+  } catch (erro) {
+    const duracaoSegundos = (Date.now() - inicio) / 1000;
+    const erroComMetricas = erro instanceof Error ? erro : new Error(String(erro));
+    (erroComMetricas as any).metricasParciais = { tentativasImagem, ajustesAgente, duracaoSegundos, layout: layoutFinal, fonte: fonteFinal };
+    throw erroComMetricas;
   }
-
-  console.log("Limite de tentativas atingido sem aprovação.");
-  return { sucesso: false, historico };
 }

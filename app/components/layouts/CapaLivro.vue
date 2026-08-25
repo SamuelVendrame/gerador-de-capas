@@ -130,10 +130,10 @@
 
   .faixa {
     width: 100%;
-    margin: auto 0;        /* centraliza o bloco inteiro verticalmente, sem esticar */
+    margin: auto 0;     
     display: flex;
     flex-direction: column;
-    align-items: center;   /* centraliza faixa-fundo e autor horizontalmente */
+    align-items: center;   
   }
 
   .faixa-fundo {

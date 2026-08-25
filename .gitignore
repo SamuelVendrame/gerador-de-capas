@@ -26,3 +26,4 @@ logs
 # para nao acumular arquivos gerados em testes
 
 public/renders/
+server/data/historico.json
