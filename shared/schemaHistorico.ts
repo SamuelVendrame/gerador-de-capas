@@ -18,6 +18,10 @@ export const schemaRegistroHistorico = z.object({
   ajustesAgente: z.number().optional(),
   duracaoSegundos: z.number().optional(),
   criadoEm: z.string(),
+  layoutMotivo: z.string().optional(),
+  fonteMotivo: z.string().optional(),
+  avaliacaoArte: z.string().optional(),
+  consideracoesFinais: z.string().optional(),
 });
 
 export type RegistroHistorico = z.infer<typeof schemaRegistroHistorico>;

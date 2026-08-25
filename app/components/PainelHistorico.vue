@@ -1,32 +1,46 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useHistorico } from "~/composables/useHistorico";
 import { LABELS_STATUS, formatarDataHora } from "~/composables/useFormatacao";
 
-  const { registros, carregando, carregarHistorico, tentarNovamente } = useHistorico();
+const { registros, carregando, carregarHistorico, tentarNovamente } = useHistorico();
+const registroAberto = ref<any>(null);
 
-  onMounted(carregarHistorico);
-  defineExpose({ carregarHistorico });
+onMounted(carregarHistorico);
+defineExpose({ carregarHistorico });
+
+function abrirDetalhe(registro: any) {
+  if (registro.status === "concluido") {
+    registroAberto.value = registro;
+  }
+}
 </script>
 
 <template>
-  <div class="painel-historico">
+  <DetalheCapa v-if="registroAberto" :registro="registroAberto" @fechar="registroAberto = null" />
+
+  <div v-else class="painel-historico">
     <p v-if="carregando">Carregando...</p>
     <p v-else-if="registros.length === 0" class="vazio">Nenhuma capa gerada ainda.</p>
 
-    <div v-for="registro in registros" :key="registro.id" class="item-historico">
+    <div
+      v-for="registro in registros"
+      :key="registro.id"
+      class="item-historico"
+      @click="abrirDetalhe(registro)"
+    >
       <img v-if="registro.caminhoImagem" :src="registro.caminhoImagem" class="thumb" alt="Capa gerada" />
       <div v-else class="thumb thumb-vazia" />
 
       <div class="conteudo-item">
         <div class="info">
           <strong>{{ registro.titulo }}</strong>
-            <div class="infos-livro">
-              <span class="info-livro">{{ registro.autor }} - </span>
-              <span class="info-livro">{{ registro.fonte }} - </span>
-              <span class="info-livro">{{ registro.genero }}</span>
-            </div>
-      </div>
+          <div class="infos-livro">
+            <span class="info-livro">{{ registro.autor }} - </span>
+            <span class="info-livro">{{ registro.fonte }} - </span>
+            <span class="info-livro">{{ registro.genero }}</span>
+          </div>
+        </div>
 
         <div class="linha-status">
           <div class="status" :class="registro.status">
@@ -46,7 +60,7 @@ import { LABELS_STATUS, formatarDataHora } from "~/composables/useFormatacao";
           <span class="data-hora">{{ formatarDataHora(registro.criadoEm) }}</span>
         </div>
 
-        <div v-if="registro.status === 'cancelado'" class="bloco-erro">
+        <div v-if="registro.status === 'cancelado'" class="bloco-erro" @click.stop>
           <p v-if="registro.motivoCancelamento" class="motivo">{{ registro.motivoCancelamento }}</p>
           <button class="btn-tentar-novamente" @click="tentarNovamente(registro)">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">

@@ -1,4 +1,5 @@
 import { adicionarRegistro, atualizarRegistro } from "./historicoStore";
+import { parseAvaliacao } from "../agent/parseAvaliacao";
 
 export async function criarOuReiniciarRegistro(
   id: string,
@@ -22,6 +23,13 @@ export async function criarOuReiniciarRegistro(
 }
 
 export async function registrarSucesso(id: string, resultado: any, ultimaImagem: string | undefined): Promise<void> {
+  const ultimaMensagemTexto = resultado.historico
+    .slice()
+    .reverse()
+    .find((m: any) => m.role === "assistant" && typeof m.content === "string")?.content ?? "";
+
+  const avaliacao = parseAvaliacao(ultimaMensagemTexto);
+
   await atualizarRegistro(id, {
     status: "concluido",
     caminhoImagem: ultimaImagem,
@@ -30,6 +38,7 @@ export async function registrarSucesso(id: string, resultado: any, ultimaImagem:
     tentativasImagem: resultado.tentativasImagem,
     ajustesAgente: resultado.ajustesAgente,
     duracaoSegundos: resultado.duracaoSegundos,
+    ...avaliacao,
   });
 }
 

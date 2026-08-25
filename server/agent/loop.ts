@@ -1,9 +1,10 @@
 import { chamarLLM, type Mensagem } from "./llm";
-import { TOOLS, executarTool } from "./tools";
+import { TOOLS } from "./tools";
+import { executarRodadaTools, type MetricasRodada } from "./executarRodadaTools";
+import { PROMPT_SISTEMA, montarPromptUsuario } from "./prompts";
 
 const MAX_TENTATIVAS = 3;
 
-// componentizar
 function extrairUltimaRespostaTexto(historico: Mensagem[]): string | undefined {
   for (let i = historico.length - 1; i >= 0; i--) {
     const msg = historico[i];
@@ -14,30 +15,38 @@ function extrairUltimaRespostaTexto(historico: Mensagem[]): string | undefined {
   return undefined;
 }
 
+function montarResultado(
+  sucesso: boolean,
+  historico: Mensagem[],
+  metricas: MetricasRodada,
+  inicio: number,
+  motivoFalha?: string
+) {
+  const duracaoSegundos = (Date.now() - inicio) / 1000;
+  return {
+    sucesso,
+    historico,
+    tentativasImagem: metricas.tentativasImagem,
+    ajustesAgente: metricas.ajustesAgente,
+    duracaoSegundos,
+    layout: metricas.layoutFinal,
+    fonte: metricas.fonteFinal,
+    ...(motivoFalha !== undefined ? { motivoFalha } : {}),
+  };
+}
+
 export async function rodarAgente(
   dadosDoLivro: { titulo: string; autor: string; tema: string },
   historicoInicial?: Mensagem[]
 ) {
   const inicio = Date.now();
   let tentativas = 0;
-  let ultimaImagemGerada: string | null = null;
-  let tentativasImagem = 0;
-  let ajustesAgente = 0;
-  let layoutFinal: string | undefined;
-  let fonteFinal: string | undefined;
+  const ultimaImagemGeradaRef = { valor: null as string | null };
+  const metricas: MetricasRodada = { tentativasImagem: 0, ajustesAgente: 0 };
 
   const historico: Mensagem[] = historicoInicial ?? [
-    {
-      role: "system",
-      content:
-        "Você é um agente que gera capas de livro. Use as ferramentas disponíveis para gerar a arte de fundo e depois renderizar a capa. " +
-        "Analise cada resultado visual e decida se está bom o suficiente ou se precisa corrigir. " +
-        "Quando aprovar o resultado final, responda apenas com o texto 'APROVADO' seguido de um breve resumo.",
-    },
-    {
-      role: "user",
-      content: `Gere uma capa para o livro "${dadosDoLivro.titulo}" de ${dadosDoLivro.autor}. Tema: ${dadosDoLivro.tema}`,
-    },
+    { role: "system", content: PROMPT_SISTEMA },
+    { role: "user", content: montarPromptUsuario(dadosDoLivro) },
   ];
 
   try {
@@ -48,49 +57,27 @@ export async function rodarAgente(
       const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
 
       if (respostaTexto.startsWith("APROVADO")) {
-        const duracaoSegundos = (Date.now() - inicio) / 1000;
-        return { sucesso: true, historico, tentativasImagem, ajustesAgente, duracaoSegundos, layout: layoutFinal, fonte: fonteFinal };
+        return montarResultado(true, historico, metricas, inicio);
       }
 
       if (resposta.tool_calls && resposta.tool_calls.length > 0) {
-        for (const call of resposta.tool_calls) {
-          const args = JSON.parse(call.function.arguments);
-          let url: string;
-
-          if (call.function.name === "gerarImagem") {
-            tentativasImagem++;
-            url = await executarTool(call.function.name, args);
-            ultimaImagemGerada = url;
-          } else if (call.function.name === "renderizarCapa") {
-            ajustesAgente++;
-            layoutFinal = args.layout;
-            fonteFinal = args.fonte;
-            if (ultimaImagemGerada) args.imagemUrl = ultimaImagemGerada;
-            url = await executarTool(call.function.name, args);
-          } else {
-            throw new Error(`Ferramenta desconhecida: ${call.function.name}`);
-          }
-
-          historico.push({ role: "tool", tool_call_id: call.id, content: `${call.function.name} executado com sucesso.` });
-          historico.push({
-            role: "user",
-            content: [
-              { type: "text", text: `Aqui está o resultado de ${call.function.name}, analise:` },
-              { type: "image_url", image_url: { url } },
-            ],
-          });
-        }
+        await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
       }
+
       tentativas++;
     }
 
-   const duracaoSegundos = (Date.now() - inicio) / 1000;
-   const ultimaResposta = extrairUltimaRespostaTexto(historico);
-   return { sucesso: false, historico, tentativasImagem, ajustesAgente, duracaoSegundos, layout: layoutFinal, fonte: fonteFinal, motivoFalha: ultimaResposta };
+    return montarResultado(false, historico, metricas, inicio, extrairUltimaRespostaTexto(historico));
   } catch (erro) {
     const duracaoSegundos = (Date.now() - inicio) / 1000;
     const erroComMetricas = erro instanceof Error ? erro : new Error(String(erro));
-    (erroComMetricas as any).metricasParciais = { tentativasImagem, ajustesAgente, duracaoSegundos, layout: layoutFinal, fonte: fonteFinal };
+    (erroComMetricas as any).metricasParciais = {
+      tentativasImagem: metricas.tentativasImagem,
+      ajustesAgente: metricas.ajustesAgente,
+      duracaoSegundos,
+      layout: metricas.layoutFinal,
+      fonte: metricas.fonteFinal,
+    };
     throw erroComMetricas;
   }
 }
