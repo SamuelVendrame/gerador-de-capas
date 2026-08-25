@@ -4,6 +4,8 @@ import { LIMITE_TENTATIVAS_IMAGEM, LIMITE_AJUSTES_RENDERIZACAO, type MetricasRod
 
 const TOOLS_COM_IMAGEM = ["gerarImagem", "renderizarCapa"];
 
+export type DetalheExecucao = { nomeTool: string; argumentos: Record<string, any> };
+
 function montarMensagensDeRetorno(nomeTool: string, resultado: string, toolCallId: string): Mensagem[] {
   const mensagemTool: Mensagem = {
     role: "tool",
@@ -46,7 +48,9 @@ export async function executarRodadaTools(
   historico: Mensagem[],
   ultimaImagemGeradaRef: { valor: string | null },
   metricas: MetricasRodada
-): Promise<void> {
+): Promise<DetalheExecucao[]> {
+  const detalhes: DetalheExecucao[] = [];
+
   for (const call of toolCalls) {
     const args = JSON.parse(call.function.arguments);
 
@@ -75,6 +79,9 @@ export async function executarRodadaTools(
       throw new Error(`Ferramenta desconhecida: ${call.function.name}`);
     }
 
+    detalhes.push({ nomeTool: call.function.name, argumentos: args });
     historico.push(...montarMensagensDeRetorno(call.function.name, resultado, call.id));
   }
+
+  return detalhes;
 }

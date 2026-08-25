@@ -26,7 +26,9 @@ function verResultado() {
           <h2>O agente está trabalhando</h2>
 
           <div class="status-livro">
-            <div v-if="!finalizado" class="spinner-pequeno" />
+            <span class="pill-status" :class="finalizado ? (sucesso ? 'pill-concluido' : 'pill-cancelado') : 'pill-gerando'">
+              {{ finalizado ? (sucesso ? "Concluído" : "Cancelado") : "Gerando..." }}
+            </span>
             <span>"{{ dadosLivro.titulo }}" · {{ dadosLivro.genero }}</span>
           </div>
 
@@ -68,9 +70,7 @@ function verResultado() {
 
           <div class="preview-container">
             <img v-if="caminhoImagem" :src="caminhoImagem" class="preview" alt="Preview da capa" />
-            <div v-else class="preview preview-vazio">
-              <div class="spinner-preview" />
-            </div>
+            <div v-else class="preview preview-skeleton" />
           </div>
 
           <div class="barra-progresso">
@@ -143,6 +143,16 @@ h3 { margin: 0 0 12px; font-size: 16px; }
 .passo-conteudo p { color: #666; font-size: 13px; margin: 0 0 6px; line-height: 1.4; }
 .duracao { color: #999; font-size: 12px; }
 
+.pill-status {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pill-gerando { background: rgba(124, 58, 237, 0.15); color: var(--cor-primaria, #7c3aed); }
+.pill-concluido { background: #e8f5e9; color: #2e7d32; }
+.pill-cancelado { background: #ffebee; color: #c62828; }
+
 .spinner-pequeno {
   width: 16px;
   height: 16px;
@@ -164,6 +174,16 @@ h3 { margin: 0 0 12px; font-size: 16px; }
 }
 
 .preview-container { width: 100%; max-width: 300px; }
+.preview-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulso 1.5s ease-in-out infinite;
+}
+@keyframes skeleton-pulso {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .preview { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; display: block; }
 .preview-vazio { background: #f0f0f0; display: flex; align-items: center; justify-content: center; }
 .spinner-preview {

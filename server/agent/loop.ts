@@ -101,14 +101,24 @@ export async function rodarAgente(
       }
 
       if (resposta.tool_calls && resposta.tool_calls.length > 0) {
-        await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
-        onProgresso?.({
-          titulo: tituloEtapa,
-          comentario: respostaTexto || "Processando...",
-          duracaoSegundos: duracaoEtapa,
-          caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
-        });
-      }
+          const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
+
+          const detalheAtual = detalhes[0];
+          let comentarioFinal = resumirComentario(respostaTexto);
+
+          if (detalheAtual?.nomeTool === "gerarImagem") {
+            comentarioFinal = `Prompt: "${detalheAtual.argumentos.prompt}"`;
+          } else if (detalheAtual?.nomeTool === "renderizarCapa") {
+            comentarioFinal = `Layout: ${detalheAtual.argumentos.layout} · Fonte: ${detalheAtual.argumentos.fonte}`;
+          }
+
+          onProgresso?.({
+            titulo: tituloEtapa,
+            comentario: comentarioFinal,
+            duracaoSegundos: duracaoEtapa,
+            caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
+          });
+        }
 
       iteracoes++;
     }
