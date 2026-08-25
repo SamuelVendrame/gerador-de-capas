@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  etapaAtual: number; // 1 a 4
+  etapaAtual: number; 
   totalEtapas: number;
 }>();
 </script>

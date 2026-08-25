@@ -84,7 +84,7 @@ async function gerarCapa() {
       body: validacaoCompleta.data,
     });
     resultado.value = response;
-    emit("capaGerada"); // avisa o pai que pode atualizar o histórico
+    emit("capaGerada"); 
   } catch (erro) {
     console.error("Erro ao gerar capa:", erro);
   } finally {
