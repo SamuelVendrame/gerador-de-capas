@@ -75,7 +75,6 @@ body {
   background: #fdf2f8;
   padding: 40px 20px;
   box-sizing: border-box;
- 
 }
 
 .card-central {
@@ -84,6 +83,8 @@ body {
   background: white;
   border-radius: 12px;
   overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+
 }
 
 .cabecalho {

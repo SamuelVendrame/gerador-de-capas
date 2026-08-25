@@ -1,15 +1,23 @@
 <script setup lang="ts">
-  defineProps<{
-    etapaAtual: number; 
-    totalEtapas: number;
-  }>();
+const props = defineProps<{
+  etapaAtual: number;
+  totalEtapas: number;
+}>();
+
+const NOMES_ETAPAS: Record<number, string> = {
+  1: "Livro",
+  2: "Gênero",
+  3: "Descrição",
+  4: "Clima",
+};
 </script>
 
 <template>
-  <div>
-
+  <div class="cabecalho-progresso">
+    <span class="rotulo-passo">Passo {{ etapaAtual }} de {{ totalEtapas }} · {{ NOMES_ETAPAS[etapaAtual] }}</span>
+    <span class="nota-agente">Tipografia, layout e paleta: o agente decide</span>
   </div>
-  
+
   <div class="barra-progresso">
     <div
       v-for="n in totalEtapas"
@@ -21,16 +29,32 @@
 </template>
 
 <style scoped>
+.cabecalho-progresso {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.rotulo-passo {
+  color: rgb(124, 58, 237);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.nota-agente {
+  color: #999;
+}
+
 .barra-progresso {
   display: flex;
   gap: 8px;
-  background-color: #f1f1f1;;
 }
 .segmento {
   flex: 1;
   height: 6px;
   border-radius: 3px;
-  background: #bbbbbb;
+  background: #e0e0e0;
   transition: background 0.3s;
 }
 .segmento.preenchido {

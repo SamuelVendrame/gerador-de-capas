@@ -7,8 +7,6 @@ const emit = defineEmits<{ gerar: [] }>();
 
 <template>
   <div class="etapa">
-    <h2>Alguma preferência de clima?</h2>
-    <p class="subtitulo">Opcional. Se você não disser nada, o agente decide e mostra o motivo de cada escolha.</p>
 
     <div class="campo">
       <label for="clima">Preferências de clima (opcional)</label>

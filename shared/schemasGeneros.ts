@@ -11,8 +11,8 @@ export const GENEROS = [
 const VALORES_GENERO = GENEROS.map((g) => g.valor) as [string, ...string[]];
 
 export const schemaEtapa1 = z.object({
-  titulo: z.string().min(1, "Título é obrigatório").max(100, "Título muito longo"),
-  autor: z.string().min(1, "Autor é obrigatório").max(100, "Nome muito longo"),
+  titulo: z.string().min(1, "Insira um título.").max(100, "Título muito longo"),
+  autor: z.string().min(1, "Insira um autor.").max(100, "Nome muito longo"),
 });
 
 export const schemaEtapa2 = z.object({

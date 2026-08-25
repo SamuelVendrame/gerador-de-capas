@@ -4,9 +4,6 @@
 
 <template>
   <div class="etapa">
-    <h2>Sobre o que ele fala?</h2>
-    <p class="subtitulo">É daqui que sai o prompt da arte de fundo. Fale do tom, do lugar, do conflito.</p>
-
     <div class="campo">
       <label for="descricao">Descrição breve</label>
       <textarea id="descricao" v-model="descricao" rows="4" />
