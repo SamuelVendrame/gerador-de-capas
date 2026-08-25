@@ -11,6 +11,12 @@ async function garantirArquivo(): Promise<void> {
 
   if (!existsSync(CAMINHO_ARQUIVO)) {
     await writeFile(CAMINHO_ARQUIVO, JSON.stringify([], null, 2));
+    return;
+  }
+
+  const conteudo = await readFile(CAMINHO_ARQUIVO, "utf-8");
+  if (!conteudo.trim()) {
+    await writeFile(CAMINHO_ARQUIVO, JSON.stringify([], null, 2));
   }
 }
 
@@ -22,7 +28,7 @@ export async function lerHistorico(): Promise<RegistroHistorico[]> {
 
 export async function adicionarRegistro(registro: RegistroHistorico): Promise<void> {
   const historico = await lerHistorico();
-  historico.unshift(registro); // mais recente primeiro
+  historico.unshift(registro); 
   await writeFile(CAMINHO_ARQUIVO, JSON.stringify(historico, null, 2));
 }
 

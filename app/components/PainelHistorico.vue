@@ -1,59 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import type { RegistroHistorico } from "~~/shared/schemaHistorico";
+import { onMounted } from "vue";
+import { useHistorico } from "~/composables/useHistorico";
+import { LABELS_STATUS, formatarDataHora } from "~/composables/useFormatacao";
 
-  const registros = ref<RegistroHistorico[]>([]);
-  const carregando = ref(true);
-
-  async function carregarHistorico() {
-    carregando.value = true;
-    try {
-      registros.value = await $fetch("/api/historico");
-    } catch (erro) {
-      console.error("Erro ao carregar histórico:", erro);
-    } finally {
-      carregando.value = false;
-    }
-  }
-
-  async function tentarNovamente(registro: RegistroHistorico) {
-    try {
-      await $fetch("/api/gerar-capa", {
-        method: "POST",
-        body: {
-          titulo: registro.titulo,
-          autor: registro.autor,
-          genero: registro.genero,
-          descricao: registro.descricao,
-          clima: registro.clima,
-          idExistente: registro.id,
-        },
-      });
-      carregarHistorico();
-    } catch (erro) {
-      console.error("Erro ao tentar novamente:", erro);
-    }
-  }
-
-  function formatarDataHora(isoString: string): string {
-    const data = new Date(isoString);
-    return data.toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  const { registros, carregando, carregarHistorico, tentarNovamente } = useHistorico();
 
   onMounted(carregarHistorico);
-
   defineExpose({ carregarHistorico });
-
-  const LABELS_STATUS: Record<string, string> = {
-    concluido: "Concluído",
-    em_processamento: "Em processamento",
-    cancelado: "Falhou após 3 tentativas",
-  };
 </script>
 
 <template>
@@ -73,7 +26,7 @@ import type { RegistroHistorico } from "~~/shared/schemaHistorico";
               <span class="info-livro">{{ registro.fonte }} - </span>
               <span class="info-livro">{{ registro.genero }}</span>
             </div>
-        </div>
+      </div>
 
         <div class="linha-status">
           <div class="status" :class="registro.status">
@@ -93,7 +46,6 @@ import type { RegistroHistorico } from "~~/shared/schemaHistorico";
           <span class="data-hora">{{ formatarDataHora(registro.criadoEm) }}</span>
         </div>
 
-    
         <div v-if="registro.status === 'cancelado'" class="bloco-erro">
           <p v-if="registro.motivoCancelamento" class="motivo">{{ registro.motivoCancelamento }}</p>
           <button class="btn-tentar-novamente" @click="tentarNovamente(registro)">
@@ -104,7 +56,6 @@ import type { RegistroHistorico } from "~~/shared/schemaHistorico";
             Tentar Novamente
           </button>
         </div>
-
       </div>
     </div>
   </div>
