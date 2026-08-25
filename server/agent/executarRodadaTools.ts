@@ -1,6 +1,6 @@
 import { executarTool } from "./tools";
 import type { Mensagem } from "../types/llm-types";
-import type { MetricasRodada } from "../types/tools-types";
+import { LIMITE_TENTATIVAS_IMAGEM, LIMITE_AJUSTES_RENDERIZACAO, type MetricasRodada } from "../types/tools-types";
 
 const TOOLS_COM_IMAGEM = ["gerarImagem", "renderizarCapa"];
 
@@ -24,9 +24,20 @@ function montarMensagensDeRetorno(nomeTool: string, resultado: string, toolCallI
     ];
   }
 
+  return [mensagemTool, { role: "user", content: `Resultado de ${nomeTool}: ${resultado}` }];
+}
+
+function montarMensagemLimiteAtingido(toolCallId: string, nomeTool: string, etapa: string): Mensagem[] {
   return [
-    mensagemTool,
-    { role: "user", content: `Resultado de ${nomeTool}: ${resultado}` },
+    {
+      role: "tool",
+      tool_call_id: toolCallId,
+      content: `${nomeTool} não executado: limite de tentativas da etapa "${etapa}" atingido.`,
+    },
+    {
+      role: "user",
+      content: `Você já usou todas as tentativas disponíveis para "${etapa}". Prossiga com o melhor resultado obtido até agora, ou finalize o processo.`,
+    },
   ];
 }
 
@@ -38,20 +49,29 @@ export async function executarRodadaTools(
 ): Promise<void> {
   for (const call of toolCalls) {
     const args = JSON.parse(call.function.arguments);
+
+    if (call.function.name === "gerarImagem" && metricas.tentativasImagem >= LIMITE_TENTATIVAS_IMAGEM) {
+      historico.push(...montarMensagemLimiteAtingido(call.id, call.function.name, "gerar imagem"));
+      continue;
+    }
+    if (call.function.name === "renderizarCapa" && metricas.ajustesAgente >= LIMITE_AJUSTES_RENDERIZACAO) {
+      historico.push(...montarMensagemLimiteAtingido(call.id, call.function.name, "renderizar capa"));
+      continue;
+    }
+
     let resultado: string;
 
     if (call.function.name === "gerarImagem") {
-        metricas.tentativasImagem++;
-        resultado = await executarTool(call.function.name, args);
-        ultimaImagemGeradaRef.valor = resultado;
+      metricas.tentativasImagem++;
+      resultado = await executarTool(call.function.name, args);
+      ultimaImagemGeradaRef.valor = resultado;
     } else if (call.function.name === "renderizarCapa") {
-        metricas.ajustesAgente++;
-        metricas.layoutFinal = args.layout;
-        metricas.fonteFinal = args.fonte;
+      metricas.ajustesAgente++;
+      metricas.layoutFinal = args.layout;
+      metricas.fonteFinal = args.fonte;
       if (ultimaImagemGeradaRef.valor) args.imagemUrl = ultimaImagemGeradaRef.valor;
-        resultado = await executarTool(call.function.name, args);
+      resultado = await executarTool(call.function.name, args);
     } else {
-      console.warn("Ferramenta desconhecida chamada. Parando o loop.")
       throw new Error(`Ferramenta desconhecida: ${call.function.name}`);
     }
 

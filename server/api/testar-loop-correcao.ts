@@ -1,5 +1,5 @@
 import { rodarAgente } from "../agent/loop";
-import type { Mensagem } from "../agent/llm";
+import type { Mensagem } from "../types/llm-types";
 
 export default defineEventHandler(async (event) => {
   const dadosDoLivro = {

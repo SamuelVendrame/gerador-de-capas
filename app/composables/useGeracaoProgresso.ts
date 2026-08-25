@@ -31,7 +31,7 @@ export function useGeracaoProgresso() {
         buffer += decoder.decode(value, { stream: true });
 
         const eventosCompletos = buffer.split("\n\n");
-        buffer = eventosCompletos.pop() ?? ""; // guarda o último pedaço (pode estar incompleto)
+        buffer = eventosCompletos.pop() ?? ""; 
 
         for (const linha of eventosCompletos) {
           if (!linha.startsWith("data: ")) continue;
@@ -39,12 +39,16 @@ export function useGeracaoProgresso() {
           try {
             const dado = JSON.parse(linha.replace("data: ", ""));
 
-            if (dado.tipo === "passo") {
-                passos.value.push({ titulo: dado.titulo, comentario: dado.comentario, duracaoSegundos: dado.duracaoSegundos });
-                    if (dado.caminhoImagem) {
-                        caminhoImagem.value = dado.caminhoImagem;
+           if (dado.tipo === "passo") {
+                const ultimoPasso = passos.value[passos.value.length - 1];
+
+                if (dado.caminhoImagem && ultimoPasso?.titulo === dado.titulo) {
+                    caminhoImagem.value = dado.caminhoImagem;
+                } else {
+                    passos.value.push({ titulo: dado.titulo, comentario: dado.comentario, duracaoSegundos: dado.duracaoSegundos });
+                    if (dado.caminhoImagem) caminhoImagem.value = dado.caminhoImagem;
                     }
-                } 
+                }
             else if (dado.tipo === "concluido") {
               finalizado.value = true;
               sucesso.value = dado.sucesso;

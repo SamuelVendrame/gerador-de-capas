@@ -4,6 +4,8 @@ import { TOOLS } from "./tools";
 import { executarRodadaTools } from "./executarRodadaTools";
 import type { MetricasRodada, CallbackProgresso } from "../types/tools-types";
 import { PROMPT_SISTEMA, montarPromptUsuario } from "./prompts";
+import { LIMITE_SEGURANCA_ITERACOES } from "../types/tools-types";
+
 
 const MAX_TENTATIVAS = 3;
 
@@ -43,7 +45,7 @@ export async function rodarAgente(
   onProgresso?: CallbackProgresso
 ) {
   const inicio = Date.now();
-  let tentativas = 0;
+  let iteracoes = 0;
   const ultimaImagemGeradaRef = { valor: null as string | null };
   const metricas: MetricasRodada = { tentativasImagem: 0, ajustesAgente: 0 };
 
@@ -53,7 +55,7 @@ export async function rodarAgente(
   ];
 
   try {
-   while (tentativas < MAX_TENTATIVAS) {
+    while (iteracoes < LIMITE_SEGURANCA_ITERACOES) {
       const inicioEtapa = Date.now();
       const resposta = await chamarLLM(historico, TOOLS);
       historico.push(resposta);
@@ -65,11 +67,7 @@ export async function rodarAgente(
         ? rotularEtapa(resposta.tool_calls[0].function.name)
         : "Revisando o resultado";
 
-      onProgresso?.({
-        titulo: tituloEtapa,
-        comentario: respostaTexto || "Processando...",
-        duracaoSegundos: duracaoEtapa,
-      });
+      onProgresso?.({ titulo: tituloEtapa, comentario: respostaTexto || "Processando...", duracaoSegundos: duracaoEtapa });
 
       if (respostaTexto.startsWith("APROVADO")) {
         if (metricas.ajustesAgente === 0) {
@@ -84,7 +82,6 @@ export async function rodarAgente(
 
       if (resposta.tool_calls && resposta.tool_calls.length > 0) {
         await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
-
         onProgresso?.({
           titulo: tituloEtapa,
           comentario: respostaTexto || "Processando...",
@@ -93,7 +90,7 @@ export async function rodarAgente(
         });
       }
 
-      tentativas++;
+      iteracoes++;
     }
 
     return montarResultado(false, historico, metricas, inicio, extrairUltimaRespostaTexto(historico));

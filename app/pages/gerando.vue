@@ -33,7 +33,10 @@ onMounted(() => {
       <div v-else class="preview preview-vazio" />
 
       <div class="barra-progresso">
-        <div class="preenchido" :style="{ width: `${Math.min(passos.length * 12.5, 100)}%` }" />
+        <div
+            class="preenchido"
+            :style="{ width: finalizado ? '100%' : `${Math.min(passos.length * 12.5, 90)}%` }"
+        />
       </div>
 
       <p v-if="finalizado">
