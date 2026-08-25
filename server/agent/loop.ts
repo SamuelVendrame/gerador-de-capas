@@ -56,9 +56,17 @@ export async function rodarAgente(
 
       const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
 
-      if (respostaTexto.startsWith("APROVADO")) {
-        return montarResultado(true, historico, metricas, inicio);
+     if (respostaTexto.startsWith("APROVADO")) {
+      if (metricas.ajustesAgente === 0) {
+        historico.push({
+          role: "user",
+          content: "Você ainda não chamou renderizarCapa para montar a capa completa com título e autor. Chame renderizarCapa antes de aprovar.",
+        });
+        tentativas++;
+        continue; // pula pra próxima iteração do while, sem aceitar essa aprovação
       }
+      return montarResultado(true, historico, metricas, inicio);
+    }
 
       if (resposta.tool_calls && resposta.tool_calls.length > 0) {
         await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
