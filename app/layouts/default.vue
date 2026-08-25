@@ -44,7 +44,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.pagina { min-height: 100vh; width: 100%; padding: 40px 20px; box-sizing: border-box; }
+.pagina { min-height: 100vh; width: 100%; padding: 40px 20px; box-sizing: border-box; background-color: #ede8f2; }
 .card-central { max-width: 900px; margin: 0 auto; background: var(--cor-branco, white); border-radius: var(--raio-card, 10px); box-shadow: var(--sombra-card, 0 1px 4px rgba(0,0,0,0.06)); overflow: hidden; }
 
 .cabecalho { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; }

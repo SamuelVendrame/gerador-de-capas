@@ -39,6 +39,7 @@ export async function registrarSucesso(id: string, resultado: any, ultimaImagem:
     ajustesAgente: resultado.ajustesAgente,
     duracaoSegundos: resultado.duracaoSegundos,
     logProcesso: resultado.logEventos,
+    imagemFundoUrl: resultado.imagemFundoUrl,
     ...avaliacao,
   });
 }

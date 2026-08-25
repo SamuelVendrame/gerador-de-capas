@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useDetalheCapa } from "~/composables/useDetalheCapa";
 
 const props = defineProps<{
@@ -11,6 +11,8 @@ const emit = defineEmits<{ fechar: [] }>();
 
 const { baixarImagem, gerarVariacao, trocarLayout, registroSelecionado } = useDetalheCapa();
 registroSelecionado.value = props.registro;
+
+watch(() => props.registro, (novo) => { registroSelecionado.value = novo; });
 
 const novoLayout = ref(props.registro.layout ?? "");
 const novaFonte = ref(props.registro.fonte ?? "");
@@ -28,41 +30,41 @@ async function aplicarTrocaLayout() {
       <span class="pill-aprovado">Aprovada pelo agente</span>
     </div>
 
-    <img v-if="registro.caminhoImagem" :src="registro.caminhoImagem" class="imagem-grande" alt="Capa gerada" />
+    <img v-if="registroSelecionado?.caminhoImagem" :src="registroSelecionado.caminhoImagem" class="imagem-grande" alt="Capa gerada" />
 
-    <h2>{{ registro.titulo }}</h2>
-    <p class="autor">{{ registro.autor }} · {{ registro.genero }}</p>
+    <h2>{{ registroSelecionado?.titulo }}</h2>
+    <p class="autor">{{ registroSelecionado?.autor }} · {{ registroSelecionado?.genero }}</p>
 
     <div class="resumo-processo">
       <h3>Resumo do processo</h3>
       <div class="estatisticas">
         <div class="estatistica">
-          <strong>{{ registro.tentativasImagem ?? 0 }}</strong>
+          <strong>{{ registroSelecionado?.tentativasImagem ?? 0 }}</strong>
           <span>tentativas de imagem</span>
         </div>
         <div class="estatistica">
-          <strong>{{ registro.ajustesAgente ?? 0 }}</strong>
+          <strong>{{ registroSelecionado?.ajustesAgente ?? 0 }}</strong>
           <span>ajustes do agente</span>
         </div>
         <div class="estatistica">
-          <strong>{{ registro.duracaoSegundos?.toFixed(1) ?? "—" }}s</strong>
+          <strong>{{ registroSelecionado?.duracaoSegundos?.toFixed(1) ?? "—" }}s</strong>
           <span>tempo total</span>
         </div>
       </div>
     </div>
 
-    <div v-if="registro.logProcesso?.length" class="log-processo">
-      <p v-for="(evento, i) in registro.logProcesso" :key="i" class="linha-log">
+    <div v-if="registroSelecionado?.logProcesso?.length" class="log-processo">
+      <p v-for="(evento, i) in registroSelecionado.logProcesso" :key="i" class="linha-log">
         {{ evento.comentario }}
       </p>
     </div>
 
-    <div v-if="registro.layoutMotivo || registro.fonteMotivo || registro.avaliacaoArte" class="decisoes-agente">
+    <div v-if="registroSelecionado?.layoutMotivo || registro.fonteMotivo || registro.avaliacaoArte" class="decisoes-agente">
       <h3>Decisões do agente</h3>
-      <p v-if="registro.layoutMotivo"><strong>Layout:</strong> {{ registro.layoutMotivo }}</p>
-      <p v-if="registro.fonteMotivo"><strong>Fonte:</strong> {{ registro.fonteMotivo }}</p>
-      <p v-if="registro.avaliacaoArte"><strong>Avaliação da arte:</strong> {{ registro.avaliacaoArte }}</p>
-      <p v-if="registro.consideracoesFinais"><strong>Considerações finais:</strong> {{ registro.consideracoesFinais }}</p>
+      <p v-if="registroSelecionado?.layoutMotivo"><strong>Layout:</strong> {{ registro.layoutMotivo }}</p>
+      <p v-if="registroSelecionado?.fonteMotivo"><strong>Fonte:</strong> {{ registro.fonteMotivo }}</p>
+      <p v-if="registroSelecionado?.avaliacaoArte"><strong>Avaliação da arte:</strong> {{ registro.avaliacaoArte }}</p>
+      <p v-if="registroSelecionado?.consideracoesFinais"><strong>Considerações finais:</strong> {{ registro.consideracoesFinais }}</p>
     </div>
 
     <div class="acoes">

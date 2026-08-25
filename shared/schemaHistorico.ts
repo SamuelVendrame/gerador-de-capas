@@ -30,7 +30,7 @@ export const schemaRegistroHistorico = z.object({
   avaliacaoArte: z.string().optional(),
   consideracoesFinais: z.string().optional(),
   logProcesso: z.array(schemaEventoProcesso).optional(),
-
+  imagemFundoUrl: z.string().optional(),
 });
 
 export type RegistroHistorico = z.infer<typeof schemaRegistroHistorico>;
