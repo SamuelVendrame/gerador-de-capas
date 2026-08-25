@@ -1,3 +1,18 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+
+const totalHistorico = ref(0);
+
+onMounted(async () => {
+  try {
+    const registros = await $fetch("/api/historico");
+    totalHistorico.value = registros.length;
+  } catch (erro) {
+    console.error("Erro ao carregar total do histórico:", erro);
+  }
+});
+</script>
+
 <template>
   <div class="pagina">
     <div class="card-central">
@@ -12,7 +27,10 @@
 
         <nav class="abas">
           <NuxtLink to="/" class="link-aba">Nova capa</NuxtLink>
-          <NuxtLink to="/?aba=historico" class="link-aba">Histórico</NuxtLink>
+          <NuxtLink to="/historico" class="link-aba">
+            Histórico
+            <span v-if="totalHistorico > 0" class="badge">{{ totalHistorico }}</span>
+          </NuxtLink>
         </nav>
       </header>
 
@@ -36,16 +54,31 @@
 
 .abas { display: flex; gap: 8px; }
 .link-aba {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 14px;
   border-radius: 999px;
   font-size: 14px;
   color: #666;
   text-decoration: none;
 }
-.link-aba.router-link-active {
+.link-aba.router-link-exact-active {
   background: var(--cor-primaria-clara, rgba(124,58,237,0.15));
   color: var(--cor-primaria, #7c3aed);
   font-weight: 600;
+}
+
+.badge {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 1px 7px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.link-aba.router-link-exact-active .badge {
+  background: var(--cor-primaria, #7c3aed);
+  color: white;
 }
 
 .divisor { border: none; border-top: 1px solid #e0e0e0; margin: 0; }
