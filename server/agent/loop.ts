@@ -6,7 +6,6 @@ import type { MetricasRodada, CallbackProgresso } from "../types/tools-types";
 import { PROMPT_SISTEMA, montarPromptUsuario } from "./prompts";
 import { LIMITE_SEGURANCA_ITERACOES } from "../types/tools-types";
 
-
 const MAX_TENTATIVAS = 3;
 
 function extrairUltimaRespostaTexto(historico: Mensagem[]): string | undefined {
@@ -17,6 +16,12 @@ function extrairUltimaRespostaTexto(historico: Mensagem[]): string | undefined {
     }
   }
   return undefined;
+}
+
+function resumirComentario(texto: string): string {
+  if (!texto) return "Processando...";
+  const primeiraFrase = texto.split(/[.!?]\s/)[0] ?? texto;
+  return primeiraFrase.length > 140 ? primeiraFrase.slice(0, 140) + "..." : primeiraFrase + ".";
 }
 
 function montarResultado(
@@ -56,27 +61,42 @@ export async function rodarAgente(
 
   try {
     while (iteracoes < LIMITE_SEGURANCA_ITERACOES) {
-      const inicioEtapa = Date.now();
-      const resposta = await chamarLLM(historico, TOOLS);
-      historico.push(resposta);
+    const inicioEtapa = Date.now();
+    const resposta = await chamarLLM(historico, TOOLS);
+    historico.push(resposta);
 
-      const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
-      const duracaoEtapa = (Date.now() - inicioEtapa) / 1000;
+    const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
+    const duracaoEtapa = (Date.now() - inicioEtapa) / 1000;
 
-      const tituloEtapa = resposta.tool_calls?.[0]?.function.name
-        ? rotularEtapa(resposta.tool_calls[0].function.name)
-        : "Revisando o resultado";
+    if (respostaTexto.startsWith("APROVADO")) {
+      if (metricas.ajustesAgente === 0) {
+        historico.push({ role: "user", content: "Você ainda não chamou renderizarCapa. Chame antes de aprovar." });
+        continue;
+      }
+      const nota = respostaTexto.match(/Nota da autorrevisão:\s*([\d.,]+)/i)?.[1] ?? "—";
+      onProgresso?.({ titulo: "Capa aprovada pelo agente", comentario: `Nota da autorrevisão: ${nota}`, duracaoSegundos: duracaoEtapa });
+      return montarResultado(true, historico, metricas, inicio);
+    }
 
-      onProgresso?.({ titulo: tituloEtapa, comentario: respostaTexto || "Processando...", duracaoSegundos: duracaoEtapa });
+    const tituloEtapa = resposta.tool_calls?.[0]?.function.name
+      ? rotularEtapa(resposta.tool_calls[0].function.name)
+      : "Revisando o resultado";
+
+    onProgresso?.({ titulo: tituloEtapa, comentario: resumirComentario(respostaTexto), duracaoSegundos: duracaoEtapa });
 
       if (respostaTexto.startsWith("APROVADO")) {
         if (metricas.ajustesAgente === 0) {
-          historico.push({
-            role: "user",
-            content: "Você ainda não chamou renderizarCapa. Chame antes de aprovar.",
-          });
+          historico.push({ role: "user", content: "Você ainda não chamou renderizarCapa. Chame antes de aprovar." });
           continue;
         }
+
+        const nota = respostaTexto.match(/Nota da autorrevisão:\s*([\d.,]+)/i)?.[1] ?? "—";
+        onProgresso?.({
+          titulo: "Capa aprovada pelo agente",
+          comentario: `Nota da autorrevisão: ${nota}`,
+          duracaoSegundos: duracaoEtapa,
+        });
+
         return montarResultado(true, historico, metricas, inicio);
       }
 
