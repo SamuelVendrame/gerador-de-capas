@@ -53,7 +53,7 @@ export async function rodarAgente(
   ];
 
   try {
-    while (tentativas < MAX_TENTATIVAS) {
+   while (tentativas < MAX_TENTATIVAS) {
       const inicioEtapa = Date.now();
       const resposta = await chamarLLM(historico, TOOLS);
       historico.push(resposta);
@@ -77,7 +77,6 @@ export async function rodarAgente(
             role: "user",
             content: "Você ainda não chamou renderizarCapa. Chame antes de aprovar.",
           });
-          tentativas++;
           continue;
         }
         return montarResultado(true, historico, metricas, inicio);
@@ -85,6 +84,13 @@ export async function rodarAgente(
 
       if (resposta.tool_calls && resposta.tool_calls.length > 0) {
         await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
+
+        onProgresso?.({
+          titulo: tituloEtapa,
+          comentario: respostaTexto || "Processando...",
+          duracaoSegundos: duracaoEtapa,
+          caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
+        });
       }
 
       tentativas++;

@@ -8,41 +8,64 @@ export function useGeracaoProgresso() {
   const sucesso = ref<boolean | null>(null);
   const caminhoImagem = ref<string | null>(null);
   const motivo = ref<string | null>(null);
+  const erroFatal = ref<string | null>(null);
 
-  function iniciar(dados: any) {
-    const response = fetch("/api/gerar-capa-stream", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dados),
-    });
+  async function iniciar(dados: any) {
+    try {
+      const response = await fetch("/api/gerar-capa-stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados),
+      });
 
-    response.then(async (res) => {
-      const reader = res.body?.getReader();
+      const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       if (!reader) return;
+
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const texto = decoder.decode(value);
-        const linhas = texto.split("\n\n").filter((l) => l.startsWith("data: "));
+        buffer += decoder.decode(value, { stream: true });
 
-        for (const linha of linhas) {
-          const dado = JSON.parse(linha.replace("data: ", ""));
+        const eventosCompletos = buffer.split("\n\n");
+        buffer = eventosCompletos.pop() ?? ""; // guarda o último pedaço (pode estar incompleto)
 
-          if (dado.tipo === "passo") {
-            passos.value.push({ titulo: dado.titulo, comentario: dado.comentario, duracaoSegundos: dado.duracaoSegundos });
-          } else if (dado.tipo === "concluido") {
-            finalizado.value = true;
-            sucesso.value = dado.sucesso;
-            caminhoImagem.value = dado.caminhoImagem ?? null;
-            motivo.value = dado.motivo ?? null;
+        for (const linha of eventosCompletos) {
+          if (!linha.startsWith("data: ")) continue;
+
+          try {
+            const dado = JSON.parse(linha.replace("data: ", ""));
+
+            if (dado.tipo === "passo") {
+                passos.value.push({ titulo: dado.titulo, comentario: dado.comentario, duracaoSegundos: dado.duracaoSegundos });
+                    if (dado.caminhoImagem) {
+                        caminhoImagem.value = dado.caminhoImagem;
+                    }
+                } 
+            else if (dado.tipo === "concluido") {
+              finalizado.value = true;
+              sucesso.value = dado.sucesso;
+              caminhoImagem.value = dado.caminhoImagem ?? null;
+              motivo.value = dado.motivo ?? null;
+            } else if (dado.tipo === "erro") {
+              finalizado.value = true;
+              sucesso.value = false;
+              erroFatal.value = dado.mensagem;
+            }
+          } catch (erroParse) {
+            console.error("Falha ao parsear evento SSE:", erroParse, linha);
           }
         }
       }
-    });
+    } catch (erro) {
+      console.error("Erro na conexão de streaming:", erro);
+      erroFatal.value = erro instanceof Error ? erro.message : "Erro desconhecido";
+      finalizado.value = true;
+    }
   }
 
-  return { passos, finalizado, sucesso, caminhoImagem, motivo, iniciar };
+  return { passos, finalizado, sucesso, caminhoImagem, motivo, erroFatal, iniciar };
 }

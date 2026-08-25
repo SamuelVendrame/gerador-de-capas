@@ -9,6 +9,7 @@ export type EventoProgresso = {
   titulo: string;
   comentario: string;
   duracaoSegundos: number;
+  caminhoImagem?: string;
 };
 
 export type CallbackProgresso = (evento: EventoProgresso) => void;
