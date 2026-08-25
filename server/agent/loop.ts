@@ -1,6 +1,8 @@
-import { chamarLLM, type Mensagem } from "./llm";
+import { chamarLLM } from "./llm";
+import type { Mensagem } from "../types/llm-types";
 import { TOOLS } from "./tools";
-import { executarRodadaTools, type MetricasRodada } from "./executarRodadaTools";
+import { executarRodadaTools } from "./executarRodadaTools";
+import type { MetricasRodada, CallbackProgresso } from "../types/tools-types";
 import { PROMPT_SISTEMA, montarPromptUsuario } from "./prompts";
 
 const MAX_TENTATIVAS = 3;
@@ -37,7 +39,8 @@ function montarResultado(
 
 export async function rodarAgente(
   dadosDoLivro: { titulo: string; autor: string; tema: string },
-  historicoInicial?: Mensagem[]
+  historicoInicial?: Mensagem[],
+  onProgresso?: CallbackProgresso
 ) {
   const inicio = Date.now();
   let tentativas = 0;
@@ -51,22 +54,34 @@ export async function rodarAgente(
 
   try {
     while (tentativas < MAX_TENTATIVAS) {
+      const inicioEtapa = Date.now();
       const resposta = await chamarLLM(historico, TOOLS);
       historico.push(resposta);
 
       const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
+      const duracaoEtapa = (Date.now() - inicioEtapa) / 1000;
 
-     if (respostaTexto.startsWith("APROVADO")) {
-      if (metricas.ajustesAgente === 0) {
-        historico.push({
-          role: "user",
-          content: "Você ainda não chamou renderizarCapa para montar a capa completa com título e autor. Chame renderizarCapa antes de aprovar.",
-        });
-        tentativas++;
-        continue; // pula pra próxima iteração do while, sem aceitar essa aprovação
+      const tituloEtapa = resposta.tool_calls?.[0]?.function.name
+        ? rotularEtapa(resposta.tool_calls[0].function.name)
+        : "Revisando o resultado";
+
+      onProgresso?.({
+        titulo: tituloEtapa,
+        comentario: respostaTexto || "Processando...",
+        duracaoSegundos: duracaoEtapa,
+      });
+
+      if (respostaTexto.startsWith("APROVADO")) {
+        if (metricas.ajustesAgente === 0) {
+          historico.push({
+            role: "user",
+            content: "Você ainda não chamou renderizarCapa. Chame antes de aprovar.",
+          });
+          tentativas++;
+          continue;
+        }
+        return montarResultado(true, historico, metricas, inicio);
       }
-      return montarResultado(true, historico, metricas, inicio);
-    }
 
       if (resposta.tool_calls && resposta.tool_calls.length > 0) {
         await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
@@ -88,4 +103,12 @@ export async function rodarAgente(
     };
     throw erroComMetricas;
   }
+}
+
+function rotularEtapa(nomeTool: string): string {
+  const rotulos: Record<string, string> = {
+    gerarImagem: "Gerando imagem",
+    renderizarCapa: "Montando a capa e capturando preview",
+  };
+  return rotulos[nomeTool] ?? nomeTool;
 }

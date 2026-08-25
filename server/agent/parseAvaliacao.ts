@@ -1,9 +1,4 @@
-export type AvaliacaoEstruturada = {
-  layoutMotivo?: string;
-  fonteMotivo?: string;
-  avaliacaoArte?: string;
-  consideracoesFinais?: string;
-};
+import type { AvaliacaoEstruturada } from "../types/avaliacao-types";
 
 export function parseAvaliacao(texto: string): AvaliacaoEstruturada {
   const extrairCampo = (rotulo: string): string | undefined => {

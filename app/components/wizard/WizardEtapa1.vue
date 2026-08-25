@@ -23,7 +23,7 @@
 </template>
 
 <style scoped>
-    .etapa { display: flex; flex-direction: column; gap: 16px; }
+    .etapa { display: flex; flex-direction: column; gap: 16px; background-color: #f1f1f1;; }
     .subtitulo { color: #666; font-size: 14px; margin: -8px 0 8px; }
     .campo { display: flex; flex-direction: column; gap: 4px; }
     label { font-weight: 600; }

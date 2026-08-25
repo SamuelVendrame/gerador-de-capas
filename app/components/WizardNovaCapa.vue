@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { useWizardCapa } from "../composables/useWizardCapa";
-
-const emit = defineEmits<{ capaGerada: [] }>();
+import { useWizardCapa } from "~/composables/useWizardCapa";
 
 const {
   etapaAtual,
@@ -12,17 +10,10 @@ const {
   genero,
   descricao,
   clima,
-  gerando,
-  resultado,
   avancar,
   voltar,
   gerarCapa,
 } = useWizardCapa();
-
-async function aoSubmeterGeracao() {
-  const sucesso = await gerarCapa();
-  if (sucesso) emit("capaGerada");
-}
 </script>
 
 <template>
@@ -35,8 +26,8 @@ async function aoSubmeterGeracao() {
     <WizardEtapa4
       v-else-if="etapaAtual === 4"
       v-model:clima="clima"
-      :gerando="gerando"
-      @gerar="aoSubmeterGeracao"
+      :gerando="false"
+      @gerar="gerarCapa"
     />
 
     <div v-if="Object.keys(erros).length > 0" class="resumo-erros">
@@ -46,10 +37,6 @@ async function aoSubmeterGeracao() {
     <div class="navegacao">
       <button v-if="etapaAtual > 1" class="btn-voltar" @click="voltar">Voltar</button>
       <button v-if="etapaAtual < totalEtapas" class="btn-avancar" @click="avancar">Avançar</button>
-    </div>
-
-    <div v-if="resultado" class="resultado">
-      <p>{{ resultado.sucesso ? "Capa gerada com sucesso!" : "Não foi possível aprovar a capa." }}</p>
     </div>
   </div>
 </template>

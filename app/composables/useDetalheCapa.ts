@@ -30,7 +30,6 @@ export function useDetalheCapa() {
         genero: registroSelecionado.value.genero,
         descricao: registroSelecionado.value.descricao,
         clima: registroSelecionado.value.clima,
-        // sem idExistente: gera um registro NOVO, mantendo o original intacto
       },
     });
     fecharDetalhe();

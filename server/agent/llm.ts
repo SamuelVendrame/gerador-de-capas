@@ -1,32 +1,32 @@
-export type ToolCall = {
-    id: string;
-    function: { name: string; arguments: string }; 
-};
-
-export type Mensagem = {
-    role: "system" | "user" | "assistant" | "tool";
-    content: string | Array<{ type: "text" | "image_url"; text?: string; image_url?: { url: string } }>;
-    tool_calls?: ToolCall[];
-    tool_call_id?: string;
-};
+import type { ToolCall, Mensagem } from "../types/llm-types";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 const MODELOS_FALLBACK = [
   "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-  "google/gemma-4-31b-it:free",
   "openrouter/free"
 ];
 
-function erroDeRateLimit(mensagem: string): boolean {
-  return mensagem.includes("ResourceExhausted") || mensagem.includes("Rate limit") || mensagem.includes("429");
+function verificarRateLimitOuLancar(mensagemErro: string, modelo: string, contexto: { ultimoErro: Error | null }): void {
+  const rateLimit =
+    mensagemErro.includes("ResourceExhausted") ||
+    mensagemErro.includes("Rate limit") ||
+    mensagemErro.includes("429");
+
+  if (rateLimit) {
+    console.warn(`[chamarLLM] Modelo ${modelo} com rate limit, tentando próximo...`);
+    contexto.ultimoErro = new Error(mensagemErro);
+    return;
+  }
+
+  throw new Error(mensagemErro);
 }
 
 export async function chamarLLM(historico: Mensagem[], tools: any): Promise<Mensagem> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error("OPENROUTER_API_KEY não configurada no .env");
 
-  let ultimoErro: Error | null = null;
+  const contexto = { ultimoErro: null as Error | null };
 
   for (const modelo of MODELOS_FALLBACK) {
     try {
@@ -39,37 +39,41 @@ export async function chamarLLM(historico: Mensagem[], tools: any): Promise<Mens
       const textoResposta = await response.text();
 
       if (!response.ok) {
-        if (erroDeRateLimit(textoResposta)) {
-          console.warn(`[chamarLLM] Modelo ${modelo} com rate limit, tentando próximo...`);
-          ultimoErro = new Error(`OpenRouter retornou HTTP ${response.status}: ${textoResposta}`);
-          continue;
-        }
-        throw new Error(`OpenRouter retornou HTTP ${response.status}: ${textoResposta}`);
+        verificarRateLimitOuLancar(
+          `OpenRouter retornou HTTP ${response.status}: ${textoResposta}`,
+          modelo,
+          contexto
+        );
+        continue;
       }
 
       let data;
       try {
         data = JSON.parse(textoResposta);
       } catch {
-        throw new Error(`A API não retornou um JSON válido. Conteúdo bruto:\n${textoResposta}`);
+        verificarRateLimitOuLancar(
+          `A API não retornou um JSON válido. Conteúdo bruto:\n${textoResposta}`,
+          modelo,
+          contexto
+        );
+        continue;
       }
 
       const escolha = data.choices?.[0];
       if (!escolha) {
-        if (erroDeRateLimit(textoResposta)) {
-          console.warn(`[chamarLLM] Modelo ${modelo} com rate limit, tentando próximo...`);
-          ultimoErro = new Error(`Resposta sem 'choices': ${textoResposta}`);
-          continue;
-        }
-        throw new Error(`Resposta do OpenRouter sem 'choices'. Resposta completa: ${textoResposta}`);
+        verificarRateLimitOuLancar(
+          `Resposta do OpenRouter sem 'choices'. Resposta completa: ${textoResposta}`,
+          modelo,
+          contexto
+        );
+        continue;
       }
 
       return escolha.message as Mensagem;
     } catch (erro) {
-      ultimoErro = erro instanceof Error ? erro : new Error(String(erro));
-      if (!erroDeRateLimit(ultimoErro.message)) throw ultimoErro; // erro real, não adianta trocar de modelo
+      throw erro instanceof Error ? erro : new Error(String(erro));
     }
   }
 
-  throw new Error(`Todos os modelos de fallback falharam. Último erro: ${ultimoErro?.message}`);
+  throw new Error(`Todos os modelos de fallback falharam. Último erro: ${contexto.ultimoErro?.message}`);
 }

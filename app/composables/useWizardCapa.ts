@@ -1,7 +1,9 @@
 import { ref } from "vue";
 import { schemaEtapa1, schemaEtapa2, schemaEtapa3, schemaEtapa4, schemaGeracaoCapa } from "~~/shared/schemasGeneros";
+import { useRouter } from "vue-router";
 
 export function useWizardCapa() {
+  const router = useRouter()
   const etapaAtual = ref(1);
   const totalEtapas = 4;
   const erros = ref<Record<string, string>>({});
@@ -11,9 +13,6 @@ export function useWizardCapa() {
   const genero = ref("");
   const descricao = ref("");
   const clima = ref("");
-
-  const gerando = ref(false);
-  const resultado = ref<any>(null);
 
   function validarEtapaAtual(): boolean {
     erros.value = {};
@@ -48,7 +47,7 @@ export function useWizardCapa() {
     }
   }
 
-  async function gerarCapa(): Promise<boolean> {
+  function gerarCapa(): boolean {
     if (!validarEtapaAtual()) return false;
 
     const validacaoCompleta = schemaGeracaoCapa.safeParse({
@@ -64,18 +63,9 @@ export function useWizardCapa() {
       return false;
     }
 
-    gerando.value = true;
-    resultado.value = null;
-
-    try {
-      resultado.value = await $fetch("/api/gerar-capa", { method: "POST", body: validacaoCompleta.data });
-      return true;
-    } catch (erro) {
-      console.error("Erro ao gerar capa:", erro);
-      return false;
-    } finally {
-      gerando.value = false;
-    }
+    sessionStorage.setItem("dadosGeracaoCapa", JSON.stringify(validacaoCompleta.data));
+    router.push("/gerando");
+    return true;
   }
 
   return {
@@ -87,8 +77,6 @@ export function useWizardCapa() {
     genero,
     descricao,
     clima,
-    gerando,
-    resultado,
     avancar,
     voltar,
     gerarCapa,

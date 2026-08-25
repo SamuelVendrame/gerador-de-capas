@@ -1,11 +1,15 @@
 <script setup lang="ts">
-defineProps<{
-  etapaAtual: number; 
-  totalEtapas: number;
-}>();
+  defineProps<{
+    etapaAtual: number; 
+    totalEtapas: number;
+  }>();
 </script>
 
 <template>
+  <div>
+
+  </div>
+  
   <div class="barra-progresso">
     <div
       v-for="n in totalEtapas"
@@ -20,13 +24,13 @@ defineProps<{
 .barra-progresso {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
+  background-color: #f1f1f1;;
 }
 .segmento {
   flex: 1;
   height: 6px;
   border-radius: 3px;
-  background: #e0e0e0;
+  background: #bbbbbb;
   transition: background 0.3s;
 }
 .segmento.preenchido {
