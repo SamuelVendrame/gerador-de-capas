@@ -17,6 +17,7 @@ async function carregarTotal() {
 
 onMounted(carregarTotal);
 watch(() => route.path, carregarTotal);
+
 </script>
 
 <template>

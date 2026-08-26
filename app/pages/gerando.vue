@@ -6,10 +6,16 @@ import { useGeracaoProgresso } from "~/composables/useGeracaoProgresso";
 const route = useRoute();
 const router = useRouter();
 const { passos, finalizado, sucesso, caminhoImagem, idGeracao, iniciar, emAndamento } = useGeracaoProgresso();
-const dadosLivro = ref<{ titulo?: string; genero?: string }>({});
 
+const dadosLivro = ref<{ titulo?: string; genero?: string }>({});
 const idAcompanhando = route.query.id as string | undefined;
 let intervaloPolling: ReturnType<typeof setInterval> | null = null;
+
+function carregarDadosDoSessionStorage() {
+  const dados = JSON.parse(sessionStorage.getItem("dadosGeracaoCapa") ?? "{}");
+  dadosLivro.value = dados;
+  return dados;
+}
 
 async function verificarStatus() {
   const historico = await $fetch("/api/historico");
@@ -33,34 +39,19 @@ onMounted(() => {
     verificarStatus();
     intervaloPolling = setInterval(verificarStatus, 3000);
   } else {
-    const dados = JSON.parse(sessionStorage.getItem("dadosGeracaoCapa") ?? "{}");
-    dadosLivro.value = dados;
-    iniciar(dados);
+    const dados = carregarDadosDoSessionStorage();
+    iniciar(dados); 
   }
 });
 
-onMounted(() => {
-  if (emAndamento.value || finalizado.value) {
-    const dados = JSON.parse(sessionStorage.getItem("dadosGeracaoCapa") ?? "{}");
-    dadosLivro.value = dados;
-  } else {
-    const dados = JSON.parse(sessionStorage.getItem("dadosGeracaoCapa") ?? "{}");
-    dadosLivro.value = dados;
-    iniciar(dados);
-  }
+onUnmounted(() => {
+  if (intervaloPolling) clearInterval(intervaloPolling);
 });
 
 function verResultado() {
   router.push(`/capa/${idGeracao.value ?? idAcompanhando}`);
 }
-
-const NOMES_TOOL: Record<string, string> = {
-  gerarImagem: "Gerar Imagem",
-  renderizarCapa: "Renderizar Capa",
-};
-
 </script>
-
 <template>
   <div class="pagina">
     <div class="card-central">

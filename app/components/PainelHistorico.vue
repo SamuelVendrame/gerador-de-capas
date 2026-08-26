@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { useHistorico } from "~/composables/useHistorico";
 import { LABELS_STATUS, formatarDataHora } from "~/composables/useFormatacao";
 
-const { registros, carregando, carregarHistorico, tentarNovamente } = useHistorico();
+const { registros, carregando, carregarHistorico, tentarNovamente, resumo } = useHistorico();
 const registroAberto = ref<any>(null);
 const router = useRouter();
 
@@ -27,6 +27,10 @@ function abrirDetalhe(registro: any) {
   <div v-else class="painel-historico">
     <p v-if="carregando">Carregando...</p>
     <p v-else-if="registros.length === 0" class="vazio">Nenhuma capa gerada ainda.</p>
+
+     <p v-if="resumo.total > 0" class="resumo-historico">
+      {{ resumo.concluidas }} concluídas · {{ resumo.emProcessamento }} em processamento · {{ resumo.comFalha }} com falha — clique para abrir
+    </p>
 
     <div
       v-for="registro in registros"
@@ -228,6 +232,12 @@ function abrirDetalhe(registro: any) {
   .data-hora {
     font-size: 15px;
     color: #999;
+  }
+
+  .resumo-historico {
+    color: #999;
+    font-size: 13px;
+    margin: 0 0 16px;
   }
 
   .spinner {

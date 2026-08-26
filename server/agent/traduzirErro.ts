@@ -11,5 +11,8 @@ export function traduzirErroParaUsuario(mensagemTecnica: string): string {
   if (mensagemTecnica.includes("ResourceExhausted")) {
     return "O modelo de IA está temporariamente sobrecarregado. Tente novamente em instantes.";
   }
+  if (mensagemTecnica.includes("Insufficient credits")) {
+  return "O serviço de geração de imagens está sem créditos disponíveis. Contate o administrador do sistema.";
+}
   return "Ocorreu um erro inesperado durante a geração. Tente novamente.";
 }

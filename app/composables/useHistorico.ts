@@ -7,6 +7,13 @@ export function useHistorico() {
   const registros = ref<RegistroHistorico[]>([]);
   const carregando = ref(true);
 
+  const resumo = computed(() => {
+    const concluidas = registros.value.filter((r) => r.status === "concluido").length;
+    const emProcessamento = registros.value.filter((r) => r.status === "em_processamento").length;
+    const comFalha = registros.value.filter((r) => r.status === "cancelado").length;
+    return { concluidas, emProcessamento, comFalha, total: registros.value.length };
+  });
+
   async function carregarHistorico() {
     carregando.value = true;
     try {
@@ -30,5 +37,5 @@ export function useHistorico() {
     router.push("/gerando");
   }
 
-  return { registros, carregando, carregarHistorico, tentarNovamente };
+  return { registros, carregando, carregarHistorico, tentarNovamente, resumo };
 }

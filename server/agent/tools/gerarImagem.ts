@@ -2,17 +2,31 @@ export async function gerarImagem(prompt: string): Promise<string> {
   const apiKey = process.env.WAVESPEED_API_KEY;
   if (!apiKey) throw new Error("WAVESPEED_API_KEY não configurada no .env");
 
-  const response = await fetch(
-    "https://api.wavespeed.ai/api/v3/wavespeed-ai/z-image/turbo",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({ prompt, size: "1024*1024" }),
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  let response: Response;
+  try {
+    response = await fetch(
+      "https://api.wavespeed.ai/api/v3/wavespeed-ai/z-image/turbo",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ prompt, size: "1024*1024" }),
+        signal: controller.signal,
+      }
+    );
+  } catch (erro) {
+    if (erro instanceof Error && erro.name === "AbortError") {
+      throw new Error("Tempo limite excedido ao criar a tarefa de geração de imagem no WaveSpeed.");
     }
-  );
+    throw erro;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   const textoResposta = await response.text();
   let data: any;
@@ -46,10 +60,24 @@ async function esperarImagemWaveSpeed(taskId: string, apiKey: string): Promise<s
   for (let tentativa = 0; tentativa < maxTentativas; tentativa++) {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const response = await fetch(
-      `https://api.wavespeed.ai/api/v3/predictions/${taskId}/result`,
-      { headers: { Authorization: `Bearer ${apiKey}` } }
-    );
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    let response: Response;
+    try {
+      response = await fetch(
+        `https://api.wavespeed.ai/api/v3/predictions/${taskId}/result`,
+        { headers: { Authorization: `Bearer ${apiKey}` }, signal: controller.signal }
+      );
+    } catch (erro) {
+      if (erro instanceof Error && erro.name === "AbortError") {
+        console.warn(`[gerarImagem] tentativa ${tentativa + 1}: timeout no polling, tentando de novo...`);
+        continue; 
+      }
+      throw erro;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     const textoResposta = await response.text();
     let data: any;
@@ -70,7 +98,7 @@ async function esperarImagemWaveSpeed(taskId: string, apiKey: string): Promise<s
     const numeroTentativa = tentativa + 1;
 
     if (numeroTentativa % 5 === 0 || resultado.status === "completed" || ["failed", "cancelled", "timeout"].includes(resultado.status)) {
-      console.log(`[gerarImagem] tentativa ${numeroTentativa}: ${resultado.status}`);
+      console.log(`[gerarImagem] tentativa (pooling) ${numeroTentativa}: ${resultado.status}`);
     }
 
     if (resultado.status === "completed") {
