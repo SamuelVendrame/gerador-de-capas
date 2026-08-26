@@ -126,7 +126,7 @@ const emit = defineEmits<{ gerar: [] }>();
 }
 
 label {
-  font-weight: 600;
+  font-weight: 400;
 }
 
 textarea {
