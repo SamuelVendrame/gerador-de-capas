@@ -31,7 +31,7 @@ O diferencial não é "gerar uma imagem", mas sim o ciclo de auto-revisão: o ag
 
 A tela de progresso da geração ficou mais técnica (mostra nomes de ferramentas e detalhes do que a IA está fazendo) do que o visual do protótipo original, foi uma escolha pra caber no tempo de entrega, priorizando clareza sobre polimento visual.
 
-Sobre a persistência de dados: o histórico é armazenado em um arquivo JSON simples, não em um banco de dados. Interpretei "execução local" do PRD como não precisar de infraestrutura externa, e um arquivo resolve bem o volume de dados de uma aplicação desse tamanho, acredito eu. Mas obviamente a evolução natural disso seria ir para um SQLite local ou hospedado.
+Sobre a persistência de dados: o histórico é armazenado em um arquivo JSON simples, não em um banco de dados. Acredito que para um protótipo foi uma decisão razoável, considerando ainda mais a requisição de executar localmente, e um arquivo resolve bem o volume de dados de uma aplicação desse tamanho, acredito eu. Mas obviamente a evolução natural disso seria ir para um SQLite local ou hospedado.
 
 O projeto também não foi pensado pra escalar (histórico em arquivo simples, sem banco de dados), o foco foi cumprir bem o que foi pedido rodando localmente, não construir algo pronto pra múltiplos usuários. Talvez isso dê uma visão de código meio bagunçado (ao menos foi o que eu senti), mas é porque não tenho muita experiência com salvar itens armazenados em array/na memória, e consequentemente isso pode ter gerado um código meio estranho pra avaliar.
 
