@@ -9,7 +9,6 @@ export type PassoProgresso = {
   imagemPasso?: string;
 };
 
-// Estado fora da função = compartilhado entre todas as chamadas do composable (singleton)
 const passos = ref<PassoProgresso[]>([]);
 const finalizado = ref(false);
 const sucesso = ref<boolean | null>(null);
@@ -17,7 +16,8 @@ const caminhoImagem = ref<string | null>(null);
 const motivo = ref<string | null>(null);
 const erroFatal = ref<string | null>(null);
 const idGeracao = ref<string | null>(null);
-const emAndamento = ref(false);
+
+export const emAndamento = ref(false);
 
 export function useGeracaoProgresso() {
   async function verificarEstadoReal(id: string) {
@@ -34,7 +34,8 @@ export function useGeracaoProgresso() {
   }
 
   async function iniciar(dados: any) {
-    if (emAndamento.value) return; // já tem uma geração rodando — não inicia outra
+    
+    if (emAndamento.value) return; 
 
     emAndamento.value = true;
     passos.value = [];

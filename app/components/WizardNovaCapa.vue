@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { watch } from "vue";
+console.log("emAndamento no mount do wizard:", emAndamento.value);
 import { useWizardCapa } from "~/composables/useWizardCapa";
+import { emAndamento } from "~/composables/useGeracaoProgresso";
 
 const {
   etapaAtual,
@@ -46,13 +49,20 @@ const SUBTITULOS_ETAPA: Record<number, string> = {
         <span v-for="(mensagem, campo) in erros" :key="campo" class="erro-item">{{ mensagem }}</span>
       </div>
 
-      <div class="navegacao">
+        <div class="navegacao">
         <button v-if="etapaAtual > 1" class="btn-voltar" @click="voltar">Voltar</button>
         <button v-if="etapaAtual < totalEtapas" class="btn-avancar" @click="avancar">Avançar</button>
-        <button v-else class="btn-avancar" @click="gerarCapa">Gerar capa</button>
+        <button v-else class="btn-avancar" :disabled="emAndamento" @click="gerarCapa">
+            Gerar capa
+        </button>
+        </div>
+
+        <div v-if="emAndamento && etapaAtual === totalEtapas" class="resumo-erros">
+        <span class="erro-item">Já existe uma geração em andamento. Aguarde ela terminar antes de iniciar outra.</span>
+        </div>
+
       </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { schemaEtapa1, schemaEtapa2, schemaEtapa3, schemaEtapa4, schemaGeracaoCapa } from "~~/shared/schemasGeneros";
+import { emAndamento } from "~/composables/useGeracaoProgresso";
 
 export function useWizardCapa() {
   const router = useRouter();
@@ -58,7 +59,13 @@ export function useWizardCapa() {
   }
 
   function gerarCapa(): boolean {
+    if (emAndamento.value) {
+      erros.value = { geral: "Já existe uma geração em andamento. Aguarde ela terminar antes de iniciar outra." };
+      return false;
+    }
+
     if (!validarEtapaAtual()) return false;
+
 
     const validacaoCompleta = schemaGeracaoCapa.safeParse({
       titulo: titulo.value,
