@@ -6,9 +6,9 @@ Stack: Nuxt/Vue 3/TypeScript no front, Node.js no back, OpenRouter para o modelo
 
 ## Como rodar
 
-npm install ->
+npm install 
 
-npx playwright install chromium -> 
+npx playwright install chromium 
 
 npm run dev
 
