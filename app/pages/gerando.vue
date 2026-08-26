@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useGeracaoProgresso } from "~/composables/useGeracaoProgresso";
 
-
 const router = useRouter();
 const { passos, finalizado, sucesso, caminhoImagem, iniciar, idGeracao } = useGeracaoProgresso();
 const dadosLivro = ref<{ titulo?: string; genero?: string }>({});
@@ -17,6 +16,11 @@ onMounted(() => {
 function verResultado() {
   router.push(`/capa/${idGeracao.value}`);
 }
+
+const NOMES_TOOL: Record<string, string> = {
+  gerarImagem: "Gerar Imagem",
+  renderizarCapa: "Renderizar Capa",
+};
 
 </script>
 
@@ -46,7 +50,10 @@ function verResultado() {
               </div>
 
               <div class="passo-conteudo">
-                <strong>{{ passo.titulo }}</strong>
+                <div class="passo-cabecalho">
+                  <strong>{{ passo.titulo }}</strong>
+                  <span v-if="passo.nomeTool" class="badge-tool">{{ NOMES_TOOL[passo.nomeTool] ?? passo.nomeTool }}</span>
+                </div>
                 <p>{{ passo.comentario }}</p>
                 <span class="duracao">{{ passo.duracaoSegundos.toFixed(1) }}s</span>
               </div>
@@ -116,6 +123,18 @@ h3 { margin: 0 0 12px; font-size: 16px; }
   background: white;
   border-radius: 10px;
 }
+
+.badge-tool {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--cor-primaria, #7c3aed);
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .passo-conectado { border-top: none; border-radius: 0; }
 .lista-passos > .passo:first-child { border-radius: 10px 10px 0 0; }
 .lista-passos > .passo:last-child { border-radius: 0 0 10px 10px; }

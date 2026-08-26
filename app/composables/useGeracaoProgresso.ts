@@ -5,6 +5,7 @@ export type PassoProgresso = {
   comentario: string;
   duracaoSegundos: number;
   status: "sucesso" | "erro";
+  nomeTool?: string;
 };
 
 export function useGeracaoProgresso() {
@@ -53,6 +54,7 @@ export function useGeracaoProgresso() {
                   comentario: dado.comentario,
                   duracaoSegundos: dado.duracaoSegundos,
                   status: dado.ehCorrecao ? "erro" : "sucesso",
+                  nomeTool: dado.nomeTool,
                 });
 
                 if (dado.caminhoImagem) {

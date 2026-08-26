@@ -93,30 +93,31 @@ export async function rodarAgente(
         }
 
         if (resposta.tool_calls && resposta.tool_calls.length > 0) {
-          const tituloEtapa = rotularEtapa(resposta.tool_calls?.[0]?.function.name ?? "");
-          const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
-          const detalheAtual = detalhes[0];
+            const tituloEtapa = rotularEtapa(resposta.tool_calls?.[0]?.function.name ?? "");
+            const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
+            const detalheAtual = detalhes[0];
 
-          let comentarioFinal = resumirComentario(respostaTexto);
-          let ehCorrecao = false;
+            let comentarioFinal = resumirComentario(respostaTexto);
+            let ehCorrecao = false;
 
-          if (detalheAtual?.nomeTool === "gerarImagem") {
-            comentarioFinal = `Prompt: "${detalheAtual.argumentos.prompt}"`;
-            ehCorrecao = metricas.tentativasImagem > 1;
-          } else if (detalheAtual?.nomeTool === "renderizarCapa") {
-            comentarioFinal = `Layout: ${detalheAtual.argumentos.layout} · Fonte: ${detalheAtual.argumentos.fonte}`;
-            ehCorrecao = metricas.ajustesAgente > 1;
-          }
+            if (detalheAtual?.nomeTool === "gerarImagem") {
+              comentarioFinal = `Prompt: "${detalheAtual.argumentos.prompt}"`;
+              ehCorrecao = metricas.tentativasImagem > 1;
+            } else if (detalheAtual?.nomeTool === "renderizarCapa") {
+              comentarioFinal = `Layout: ${detalheAtual.argumentos.layout} · Fonte: ${detalheAtual.argumentos.fonte}`;
+              ehCorrecao = metricas.ajustesAgente > 1;
+            }
 
-        emitirEvento({
-          titulo: tituloEtapa,
-          comentario: comentarioFinal,
-          duracaoSegundos: duracaoEtapa,
-          caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
-          ehCorrecao,
-        });
-      } else {
-        emitirEvento({ titulo: "Revisando o resultado", comentario: resumirComentario(respostaTexto), duracaoSegundos: duracaoEtapa });
+            emitirEvento({
+              titulo: tituloEtapa,
+              comentario: comentarioFinal,
+              duracaoSegundos: duracaoEtapa,
+              caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
+              ehCorrecao,
+              nomeTool: detalheAtual?.nomeTool, // <- novo
+            });
+          } else {
+            emitirEvento({ titulo: "Revisando o resultado", comentario: resumirComentario(respostaTexto), duracaoSegundos: duracaoEtapa });
       }
 
       iteracoes++;
