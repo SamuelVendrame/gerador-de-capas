@@ -2,6 +2,7 @@ import { schemaGeracaoCapa } from "../../shared/schemasGeneros";
 import { rodarAgente } from "../agent/loop";
 import { montarTema } from "../agent/contexto";
 import { extrairUltimaImagem } from "../agent/extrairImagem";
+import { traduzirErroParaUsuario } from "../agent/traduzirErro";
 import {
   criarOuReiniciarRegistro,
   registrarSucesso,
@@ -53,7 +54,8 @@ export default defineEventHandler(async (event) => {
     }
   } catch (erro) {
     await registrarErro(id, erro);
-    enviarEvento({ tipo: "erro", mensagem: erro instanceof Error ? erro.message : "Erro desconhecido" });
+    const mensagemTecnica = erro instanceof Error ? erro.message : "Erro desconhecido";
+    enviarEvento({ tipo: "erro", mensagem: traduzirErroParaUsuario(mensagemTecnica) });
   }
 
   event.node.res.end();

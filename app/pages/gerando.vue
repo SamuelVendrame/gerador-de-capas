@@ -1,20 +1,50 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useGeracaoProgresso } from "~/composables/useGeracaoProgresso";
 
+const route = useRoute();
 const router = useRouter();
-const { passos, finalizado, sucesso, caminhoImagem, iniciar, idGeracao } = useGeracaoProgresso();
+const { passos, finalizado, sucesso, caminhoImagem, idGeracao, iniciar } = useGeracaoProgresso();
 const dadosLivro = ref<{ titulo?: string; genero?: string }>({});
 
+const idAcompanhando = route.query.id as string | undefined;
+let intervaloPolling: ReturnType<typeof setInterval> | null = null;
+
+async function verificarStatus() {
+  const historico = await $fetch("/api/historico");
+  const registro = historico.find((r: any) => r.id === idAcompanhando);
+  if (!registro) return;
+
+  dadosLivro.value = { titulo: registro.titulo, genero: registro.genero };
+
+  if (registro.status === "concluido") {
+    if (intervaloPolling) clearInterval(intervaloPolling);
+    router.push(`/capa/${registro.id}`);
+  } else if (registro.status === "cancelado") {
+    if (intervaloPolling) clearInterval(intervaloPolling);
+    finalizado.value = true;
+    sucesso.value = false;
+  }
+}
+
 onMounted(() => {
-  const dados = JSON.parse(sessionStorage.getItem("dadosGeracaoCapa") ?? "{}");
-  dadosLivro.value = dados;
-  iniciar(dados);
+  if (idAcompanhando) {
+    verificarStatus();
+    intervaloPolling = setInterval(verificarStatus, 3000);
+  } else {
+    const dados = JSON.parse(sessionStorage.getItem("dadosGeracaoCapa") ?? "{}");
+    dadosLivro.value = dados;
+    iniciar(dados);
+  }
+});
+
+onUnmounted(() => {
+  if (intervaloPolling) clearInterval(intervaloPolling);
 });
 
 function verResultado() {
-  router.push(`/capa/${idGeracao.value}`);
+  router.push(`/capa/${idGeracao.value ?? idAcompanhando}`);
 }
 
 const NOMES_TOOL: Record<string, string> = {
@@ -44,16 +74,17 @@ const NOMES_TOOL: Record<string, string> = {
                 <svg v-if="passo.status === 'sucesso'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" class="icone-sucesso">
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
+                <svg v-else-if="passo.status === 'limite'" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="icone-limite">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="4.9" y1="4.9" x2="19.1" y2="19.1" />
+                </svg>
                 <svg v-else viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="icone-erro">
                   <path d="M12 9v4M12 17h.01M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
                 </svg>
               </div>
 
               <div class="passo-conteudo">
-                <div class="passo-cabecalho">
-                  <strong>{{ passo.titulo }}</strong>
-                  <span v-if="passo.nomeTool" class="badge-tool">{{ NOMES_TOOL[passo.nomeTool] ?? passo.nomeTool }}</span>
-                </div>
+                <strong>{{ passo.titulo }}</strong>
                 <p>{{ passo.comentario }}</p>
                 <span class="duracao">{{ passo.duracaoSegundos.toFixed(1) }}s</span>
               </div>
@@ -113,6 +144,16 @@ h3 { margin: 0 0 12px; font-size: 16px; }
   margin-bottom: 20px;
 }
 
+.pill-status {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pill-gerando { background: rgba(124, 58, 237, 0.15); color: var(--cor-primaria, #7c3aed); }
+.pill-concluido { background: #e8f5e9; color: #2e7d32; }
+.pill-cancelado { background: #ffebee; color: #c62828; }
+
 .lista-passos { display: flex; flex-direction: column; }
 
 .passo {
@@ -123,18 +164,6 @@ h3 { margin: 0 0 12px; font-size: 16px; }
   background: white;
   border-radius: 10px;
 }
-
-.badge-tool {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--cor-primaria, #7c3aed);
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
 .passo-conectado { border-top: none; border-radius: 0; }
 .lista-passos > .passo:first-child { border-radius: 10px 10px 0 0; }
 .lista-passos > .passo:last-child { border-radius: 0 0 10px 10px; }
@@ -143,21 +172,12 @@ h3 { margin: 0 0 12px; font-size: 16px; }
 .passo-icone { flex-shrink: 0; padding-top: 2px; }
 .icone-sucesso { color: #2e7d32; }
 .icone-erro { color: #e65100; }
+.icone-limite { color: #c62828; }
 
 .passo-conteudo { flex: 1; }
 .passo-conteudo strong { display: block; font-size: 14px; margin-bottom: 4px; }
 .passo-conteudo p { color: #666; font-size: 13px; margin: 0 0 6px; line-height: 1.4; }
 .duracao { color: #999; font-size: 12px; }
-
-.pill-status {
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-}
-.pill-gerando { background: rgba(124, 58, 237, 0.15); color: var(--cor-primaria, #7c3aed); }
-.pill-concluido { background: #e8f5e9; color: #2e7d32; }
-.pill-cancelado { background: #ffebee; color: #c62828; }
 
 .spinner-pequeno {
   width: 16px;
@@ -180,23 +200,15 @@ h3 { margin: 0 0 12px; font-size: 16px; }
 }
 
 .preview-container { width: 100%; max-width: 300px; }
+.preview { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; display: block; }
 .preview-skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: skeleton-pulso 1.5s ease-in-out infinite;
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
 }
-@keyframes skeleton-pulso {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.preview { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; display: block; }
-.preview-vazio { background: #f0f0f0; display: flex; align-items: center; justify-content: center; }
-.spinner-preview {
-  width: 32px; height: 32px;
-  border: 3px solid #ddd; border-top-color: var(--cor-primaria, #7c3aed);
-  border-radius: 50%; animation: girar 1s linear infinite;
-}
+@keyframes skeleton-pulso { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 @keyframes girar { to { transform: rotate(360deg); } }
 
 .barra-progresso { height: 6px; background: #eee; border-radius: 3px; margin: 16px 0; overflow: hidden; max-width: 300px; }

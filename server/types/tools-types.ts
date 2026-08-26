@@ -12,6 +12,7 @@ export type EventoProgresso = {
   caminhoImagem?: string;
   ehCorrecao?: boolean;
   nomeTool?: string;
+   status?: "limite";
 };
 
 export const LIMITE_TENTATIVAS_IMAGEM = 3;

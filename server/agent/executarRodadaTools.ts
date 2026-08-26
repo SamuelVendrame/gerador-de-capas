@@ -4,7 +4,13 @@ import { LIMITE_TENTATIVAS_IMAGEM, LIMITE_AJUSTES_RENDERIZACAO, type MetricasRod
 
 const TOOLS_COM_IMAGEM = ["gerarImagem", "renderizarCapa"];
 
-export type DetalheExecucao = { nomeTool: string; argumentos: Record<string, any> };
+export type DetalheExecucao = {
+  nomeTool: string;
+  argumentos: Record<string, any>;
+  recusada?: boolean;
+  motivoRecusa?: string;
+};
+
 
 function montarMensagensDeRetorno(nomeTool: string, resultado: string, toolCallId: string): Mensagem[] {
   const mensagemTool: Mensagem = {
@@ -56,10 +62,12 @@ export async function executarRodadaTools(
 
     if (call.function.name === "gerarImagem" && metricas.tentativasImagem >= LIMITE_TENTATIVAS_IMAGEM) {
       historico.push(...montarMensagemLimiteAtingido(call.id, call.function.name, "gerar imagem"));
+      detalhes.push({ nomeTool: call.function.name, argumentos: args, recusada: true, motivoRecusa: "Limite de 3 tentativas de geração de imagem atingido." });
       continue;
     }
     if (call.function.name === "renderizarCapa" && metricas.ajustesAgente >= LIMITE_AJUSTES_RENDERIZACAO) {
       historico.push(...montarMensagemLimiteAtingido(call.id, call.function.name, "renderizar capa"));
+      detalhes.push({ nomeTool: call.function.name, argumentos: args, recusada: true, motivoRecusa: "Limite de 3 ajustes de renderização atingido." });
       continue;
     }
 

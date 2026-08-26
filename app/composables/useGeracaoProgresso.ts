@@ -4,7 +4,7 @@ export type PassoProgresso = {
   titulo: string;
   comentario: string;
   duracaoSegundos: number;
-  status: "sucesso" | "erro";
+  status: "sucesso" | "erro" | "limite";
   nomeTool?: string;
 };
 
@@ -16,6 +16,19 @@ export function useGeracaoProgresso() {
   const motivo = ref<string | null>(null);
   const erroFatal = ref<string | null>(null);
   const idGeracao = ref<string | null>(null);
+
+  async function verificarEstadoReal(id: string) {
+    try {
+      const historico = await $fetch("/api/historico");
+      const registro = historico.find((r: any) => r.id === id);
+      if (registro?.status === "concluido") {
+        sucesso.value = true;
+        caminhoImagem.value = registro.caminhoImagem;
+        erroFatal.value = null;
+      }
+    } catch {
+    }
+  }
 
   async function iniciar(dados: any) {
     try {
@@ -53,7 +66,7 @@ export function useGeracaoProgresso() {
                   titulo: dado.titulo,
                   comentario: dado.comentario,
                   duracaoSegundos: dado.duracaoSegundos,
-                  status: dado.ehCorrecao ? "erro" : "sucesso",
+                  status: dado.status === "limite" ? "limite" : (dado.ehCorrecao ? "erro" : "sucesso"),
                   nomeTool: dado.nomeTool,
                 });
 
@@ -65,10 +78,20 @@ export function useGeracaoProgresso() {
                 sucesso.value = dado.sucesso;
                 caminhoImagem.value = dado.caminhoImagem ?? null;
                 motivo.value = dado.motivo ?? null;
-              } else if (dado.tipo === "erro") {
+             } else if (dado.tipo === "erro") {
                 finalizado.value = true;
                 sucesso.value = false;
                 erroFatal.value = dado.mensagem;
+                passos.value.push({
+                  titulo: "Processo interrompido",
+                  comentario: dado.mensagem,
+                  duracaoSegundos: 0,
+                  status: "erro",
+                });
+
+                 if (idGeracao.value) {
+                    setTimeout(() => verificarEstadoReal(idGeracao.value!), 2000);
+                  }
               }
             } catch (erroParse) {
               console.error("Falha ao parsear evento SSE:", erroParse, linha);

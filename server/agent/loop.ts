@@ -3,7 +3,7 @@ import type { Mensagem } from "../types/llm-types";
 import { TOOLS } from "./tools";
 import { executarRodadaTools } from "./executarRodadaTools";
 import { PROMPT_SISTEMA, montarPromptUsuario } from "./prompts";
-import { LIMITE_SEGURANCA_ITERACOES, type MetricasRodada, type EventoProgresso, type CallbackProgresso } from "../types/tools-types";
+import { LIMITE_SEGURANCA_ITERACOES, LIMITE_TENTATIVAS_IMAGEM, type MetricasRodada, type EventoProgresso, type CallbackProgresso } from "../types/tools-types";
 
 function extrairUltimaRespostaTexto(historico: Mensagem[]): string | undefined {
   for (let i = historico.length - 1; i >= 0; i--) {
@@ -44,12 +44,14 @@ function montarResultado(
   };
 }
 
-function rotularEtapa(nomeTool: string): string {
-  const rotulos: Record<string, string> = {
-    gerarImagem: "Gerando imagem",
-    renderizarCapa: "Montando a capa e capturando preview",
-  };
-  return rotulos[nomeTool] ?? nomeTool;
+function rotularEtapa(nomeTool: string, metricas: MetricasRodada): string {
+  if (nomeTool === "gerarImagem") {
+    return `Gerando imagem (tentativa ${metricas.tentativasImagem + 1}/${LIMITE_TENTATIVAS_IMAGEM})`;
+  }
+  if (nomeTool === "renderizarCapa") {
+    return "Montando a capa e capturando preview";
+  }
+  return nomeTool;
 }
 
 export async function rodarAgente(
@@ -93,10 +95,18 @@ export async function rodarAgente(
         }
 
         if (resposta.tool_calls && resposta.tool_calls.length > 0) {
-            const tituloEtapa = rotularEtapa(resposta.tool_calls?.[0]?.function.name ?? "");
-            const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
-            const detalheAtual = detalhes[0];
+          const tituloEtapa = rotularEtapa(resposta.tool_calls?.[0]?.function.name ?? "", metricas);
+          const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
+          const detalheAtual = detalhes[0];
 
+          if (detalheAtual?.recusada) {
+            emitirEvento({
+              titulo: `${tituloEtapa} — Limite atingido`,
+              comentario: detalheAtual.motivoRecusa ?? "Limite de tentativas atingido.",
+              duracaoSegundos: duracaoEtapa,
+              status: "limite",
+            });
+          } else {
             let comentarioFinal = resumirComentario(respostaTexto);
             let ehCorrecao = false;
 
@@ -114,9 +124,10 @@ export async function rodarAgente(
               duracaoSegundos: duracaoEtapa,
               caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
               ehCorrecao,
-              nomeTool: detalheAtual?.nomeTool, // <- novo
+              nomeTool: detalheAtual?.nomeTool,
             });
-          } else {
+          }
+        } else {
             emitirEvento({ titulo: "Revisando o resultado", comentario: resumirComentario(respostaTexto), duracaoSegundos: duracaoEtapa });
       }
 

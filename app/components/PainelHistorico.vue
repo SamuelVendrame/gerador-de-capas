@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useHistorico } from "~/composables/useHistorico";
 import { LABELS_STATUS, formatarDataHora } from "~/composables/useFormatacao";
 
 const { registros, carregando, carregarHistorico, tentarNovamente } = useHistorico();
 const registroAberto = ref<any>(null);
+const router = useRouter();
 
 onMounted(carregarHistorico);
 defineExpose({ carregarHistorico });
 
 function abrirDetalhe(registro: any) {
   if (registro.status === "concluido") {
-    registroAberto.value = registro;
+    router.push(`/capa/${registro.id}`);
+  } else if (registro.status === "em_processamento") {
+    router.push(`/gerando?id=${registro.id}`);
   }
 }
+
 </script>
 
 <template>
