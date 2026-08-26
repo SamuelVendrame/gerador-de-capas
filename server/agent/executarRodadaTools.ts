@@ -60,12 +60,16 @@ export async function executarRodadaTools(
   for (const call of toolCalls) {
     const args = JSON.parse(call.function.arguments);
 
+    console.log(`[AGENTE] → Chamando ferramenta: ${call.function.name}`, args);
+
     if (call.function.name === "gerarImagem" && metricas.tentativasImagem >= LIMITE_TENTATIVAS_IMAGEM) {
+      console.log(`[AGENTE] ✗ Recusado: limite de tentativas de gerarImagem atingido.`);
       historico.push(...montarMensagemLimiteAtingido(call.id, call.function.name, "gerar imagem"));
       detalhes.push({ nomeTool: call.function.name, argumentos: args, recusada: true, motivoRecusa: "Limite de 3 tentativas de geração de imagem atingido." });
       continue;
     }
     if (call.function.name === "renderizarCapa" && metricas.ajustesAgente >= LIMITE_AJUSTES_RENDERIZACAO) {
+      console.log(`[AGENTE] ✗ Recusado: limite de ajustes de renderizarCapa atingido.`);
       historico.push(...montarMensagemLimiteAtingido(call.id, call.function.name, "renderizar capa"));
       detalhes.push({ nomeTool: call.function.name, argumentos: args, recusada: true, motivoRecusa: "Limite de 3 ajustes de renderização atingido." });
       continue;
@@ -77,12 +81,14 @@ export async function executarRodadaTools(
       metricas.tentativasImagem++;
       resultado = await executarTool(call.function.name, args);
       ultimaImagemGeradaRef.valor = resultado;
+      console.log(`[AGENTE] ✓ gerarImagem concluída (tentativa ${metricas.tentativasImagem}/${LIMITE_TENTATIVAS_IMAGEM})`);
     } else if (call.function.name === "renderizarCapa") {
       metricas.ajustesAgente++;
       metricas.layoutFinal = args.layout;
       metricas.fonteFinal = args.fonte;
       if (ultimaImagemGeradaRef.valor) args.imagemUrl = ultimaImagemGeradaRef.valor;
       resultado = await executarTool(call.function.name, args);
+      console.log(`[AGENTE] ✓ renderizarCapa concluída (ajuste ${metricas.ajustesAgente}/${LIMITE_AJUSTES_RENDERIZACAO})`);
     } else {
       throw new Error(`Ferramenta desconhecida: ${call.function.name}`);
     }

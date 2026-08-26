@@ -67,7 +67,11 @@ async function esperarImagemWaveSpeed(taskId: string, apiKey: string): Promise<s
     }
 
     const resultado = data.data;
-    console.log(`[gerarImagem] tentativa ${tentativa + 1}:`, resultado.status);
+    const numeroTentativa = tentativa + 1;
+
+    if (numeroTentativa % 5 === 0 || resultado.status === "completed" || ["failed", "cancelled", "timeout"].includes(resultado.status)) {
+      console.log(`[gerarImagem] tentativa ${numeroTentativa}: ${resultado.status}`);
+    }
 
     if (resultado.status === "completed") {
       const url = resultado.outputs?.[0];
