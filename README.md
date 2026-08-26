@@ -28,11 +28,14 @@ O diferencial não é "gerar uma imagem", mas sim o ciclo de auto-revisão: o ag
 - Alguns botões de ação (tentar novamente, gerar variação) ainda não têm proteção contra cliques duplos, diferente do botão principal de gerar capa, que já bloqueia isso se há uma geração sendo feita.
 - Não é bem uma 'limitação', é mais uma feature - mas quando você digita qualquer coisa pra ser gerada na capa (exemplo: 'FEWIFWEIFWF'), a IA vai se basear na temática enviada para gerar a imagem.
 
-## Decisões conscientes de prazo
+## Decisões 
 
 A tela de progresso da geração ficou mais técnica (mostra nomes de ferramentas e detalhes do que a IA está fazendo) do que o visual do protótipo original, foi uma escolha pra caber no tempo de entrega, priorizando clareza sobre polimento visual.
 
-O projeto também não foi pensado pra escalar (histórico em arquivo simples, sem banco de dados), o foco foi cumprir bem o que foi pedido rodando localmente, não construir algo pronto pra múltiplos usuários. Talvez isso dê uma visão de código meio bagunçado (ao menos foi o que eu senti), mas é porque não tenho muita experiência com salvar itens armazenados em array/na memória, e consequentemente isso pode ter gerado um código meio bagunçado.
+O projeto também não foi pensado pra escalar (histórico em arquivo simples, sem banco de dados), o foco foi cumprir bem o que foi pedido rodando localmente, não construir algo pronto pra múltiplos usuários. Talvez isso dê uma visão de código meio bagunçado (ao menos foi o que eu senti), mas é porque não tenho muita experiência com salvar itens armazenados em array/na memória, e consequentemente isso pode ter gerado um código meio estranho pra avaliar.
+
+O sistema também tem um teto geral de 12 iterações no loop do agente, separado do limite de 3 tentativas por etapa. Ele existe como proteção extra: garante que o processo sempre termina mesmo em algum cenário que os limites de 3 não cubram sozinhos (por exemplo, o modelo ficando preso só analisando em texto, sem chamar nenhuma ferramenta). Na prática, ele quase nunca é atingido, o fluxo normal sempre bate nos limites de 3 bem antes disso.
+
 
 ## Requisitos do PRD
 
