@@ -32,10 +32,11 @@ O diferencial não é "gerar uma imagem", mas sim o ciclo de auto-revisão: o ag
 
 A tela de progresso da geração ficou mais técnica (mostra nomes de ferramentas e detalhes do que a IA está fazendo) do que o visual do protótipo original, foi uma escolha pra caber no tempo de entrega, priorizando clareza sobre polimento visual.
 
+Sobre a persistência de dados: o histórico é armazenado em um arquivo JSON simples, não em um banco de dados. Interpretei "execução local" do PRD como não precisar de infraestrutura externa, e um arquivo resolve bem o volume de dados de uma aplicação desse tamanho, acredito eu. Mas obviamente a evolução natural disso seria ir para um SQLite local ou hospedado.
+
 O projeto também não foi pensado pra escalar (histórico em arquivo simples, sem banco de dados), o foco foi cumprir bem o que foi pedido rodando localmente, não construir algo pronto pra múltiplos usuários. Talvez isso dê uma visão de código meio bagunçado (ao menos foi o que eu senti), mas é porque não tenho muita experiência com salvar itens armazenados em array/na memória, e consequentemente isso pode ter gerado um código meio estranho pra avaliar.
 
 O sistema também tem um teto geral de 12 iterações no loop do agente, separado do limite de 3 tentativas por etapa. Ele existe como proteção extra: garante que o processo sempre termina mesmo em algum cenário que os limites de 3 não cubram sozinhos (por exemplo, o modelo ficando preso só analisando em texto, sem chamar nenhuma ferramenta). Na prática, ele quase nunca é atingido, o fluxo normal sempre bate nos limites de 3 bem antes disso.
-
 
 ## Requisitos do PRD
 
