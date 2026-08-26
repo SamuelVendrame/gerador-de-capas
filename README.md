@@ -31,6 +31,7 @@ O diferencial não é "gerar uma imagem", mas sim o ciclo de auto-revisão: o ag
 - IMPORTANTE: Não tente dar retry numa capa que foi cancelada enquanto há outra sendo gerada. Você será redirecionado para o carregamento da capa gerada atualmente (isso foi um tradeoff que eu optei por manter para conseguir entregar o projeto dentro dos dias que propus)
 - Acompanhar uma geração em andamento só funciona na mesma aba do navegador. Se você fecha a aba, o processo continua no servidor e o resultado aparece no histórico ao terminar, mas o passo a passo em tempo real se perde.
 - Alguns botões de ação (tentar novamente, gerar variação) ainda não têm proteção contra cliques duplos — diferente do botão principal de gerar capa, que já bloqueia isso.
+- Não é bem uma 'limitação', é mais uma feature - mas quando você digita qualquer coisa pra ser gerada na capa (exemplo: 'FEWIFWEIFWF'), a IA vai se basear na temática enviada para gerar a imagem.
 
 ## Decisões conscientes de prazo
 
