@@ -6,14 +6,13 @@ Stack: Nuxt/Vue 3/TypeScript no front, Node.js no back, OpenRouter para o modelo
 
 ## Como rodar
 
-npm install
-npx playwright install chromium
+npm install ->
+
+npx playwright install chromium -> 
+
 npm run dev
 
-Cria um `.env` na raiz com:
-
-OPENROUTER_API_KEY=sua_chave_aqui
-WAVESPEED_API_KEY=sua_chave_aqui
+Cria um .env na raiz com as keys
 
 Acessa em 'http://localhost:3000'.
 
