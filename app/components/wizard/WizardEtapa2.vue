@@ -23,16 +23,25 @@ const ICONES_COMPONENTE: Record<string, any> = {
           class="opcao"
           :class="{ selecionado: genero === g.valor }"
         >
-          <input type="radio" :value="g.valor" v-model="genero" class="input-oculto" />
+          <input
+            type="radio"
+            :value="g.valor"
+            v-model="genero"
+            class="input-oculto"
+          />
 
-          <component :is="ICONES_COMPONENTE[g.valor]" :size="18" class="icone-genero" />
+          <component
+            :is="ICONES_COMPONENTE[g.valor]"
+            :size="18"
+            class="icone-genero"
+          />
 
           <div class="texto-opcao">
             <span class="opcao-label">{{ g.label }}</span>
             <span class="opcao-descricao">{{ g.descricao }}</span>
           </div>
 
-          <span class="bolinha" />
+          <span class="bolinha"></span>
         </label>
       </div>
     </div>
@@ -40,8 +49,17 @@ const ICONES_COMPONENTE: Record<string, any> = {
 </template>
 
 <style scoped>
-.etapa { display: flex; flex-direction: column; gap: 16px; background-color: rgb(241, 241, 241); }
-.container-inputs { padding: 24px; background-color: white; }
+.etapa {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: rgb(241, 241, 241);
+}
+
+.container-inputs {
+  padding: 24px;
+  background-color: white;
+}
 
 .opcoes-genero {
   display: flex;
@@ -62,6 +80,7 @@ const ICONES_COMPONENTE: Record<string, any> = {
   flex: 1 1 calc(33.333% - 8px);
   min-width: 150px;
 }
+
 .opcao.selecionado {
   border-color: var(--cor-primaria, #7c3aed);
 }
@@ -72,7 +91,10 @@ const ICONES_COMPONENTE: Record<string, any> = {
   pointer-events: none;
 }
 
-.icone-genero { color: var(--cor-primaria, #7c3aed); flex-shrink: 0; }
+.icone-genero {
+  color: var(--cor-primaria, #7c3aed);
+  flex-shrink: 0;
+}
 
 .texto-opcao {
   display: flex;
@@ -80,8 +102,16 @@ const ICONES_COMPONENTE: Record<string, any> = {
   flex: 1;
   min-width: 0;
 }
-.opcao-label { font-weight: 600; font-size: 14px; }
-.opcao-descricao { color: #888; font-size: 12px; }
+
+.opcao-label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.opcao-descricao {
+  color: #888;
+  font-size: 12px;
+}
 
 .bolinha {
   width: 16px;
@@ -91,14 +121,27 @@ const ICONES_COMPONENTE: Record<string, any> = {
   flex-shrink: 0;
   position: relative;
 }
+
 .opcao.selecionado .bolinha {
   border-color: var(--cor-primaria, #7c3aed);
 }
+
 .opcao.selecionado .bolinha::after {
   content: "";
   position: absolute;
   inset: 2px;
   border-radius: 50%;
   background: var(--cor-primaria, #7c3aed);
+}
+
+@media (max-width: 600px) {
+  .container-inputs {
+    padding: 16px;
+  }
+
+  .opcao {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
 }
 </style>

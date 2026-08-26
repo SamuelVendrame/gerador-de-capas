@@ -9,12 +9,22 @@ const autor = defineModel<string>("autor", { required: true });
       <div class="linha-campos">
         <div class="campo">
           <label for="titulo">Título do livro</label>
-          <input id="titulo" v-model="titulo" type="text" placeholder="O Silêncio Entre as Marés" />
+          <input
+            id="titulo"
+            v-model="titulo"
+            type="text"
+            placeholder="O Silêncio Entre as Marés"
+          />
         </div>
 
         <div class="campo">
           <label for="autor">Autor</label>
-          <input id="autor" v-model="autor" type="text" placeholder="Helena Vasques" />
+          <input
+            id="autor"
+            v-model="autor"
+            type="text"
+            placeholder="Helena Vasques"
+          />
         </div>
       </div>
 
@@ -24,9 +34,17 @@ const autor = defineModel<string>("autor", { required: true });
 </template>
 
 <style scoped>
-.etapa { display: flex; flex-direction: column; gap: 16px; background-color: rgb(241, 241, 241); }
-.subtitulo { color: #666; font-size: 14px; margin: -8px 0 8px; }
-.container-inputs { padding: 24px; background-color: white; }
+.etapa {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: rgb(241, 241, 241);
+}
+
+.container-inputs {
+  padding: 24px;
+  background-color: white;
+}
 
 .linha-campos {
   display: flex;
@@ -38,6 +56,7 @@ const autor = defineModel<string>("autor", { required: true });
   flex-direction: column;
   gap: 6px;
   flex: 1;
+  min-width: 0;
 }
 
 label {
@@ -47,19 +66,38 @@ label {
 }
 
 input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 12px 14px;
   border: 1px solid #ddd;
   border-radius: 10px;
   font-size: 16px;
   transition: border-color 0.2s;
 }
+
 input:focus {
   outline: none;
   border-color: var(--cor-primaria, #7c3aed);
 }
+
 input::placeholder {
   color: #bbb;
 }
 
-.nota { color: #999; font-size: 13px; margin-top: 16px; }
+.nota {
+  color: #999;
+  font-size: 13px;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .container-inputs {
+    padding: 16px;
+  }
+
+  .linha-campos {
+    flex-direction: column;
+    gap: 14px;
+  }
+}
 </style>
