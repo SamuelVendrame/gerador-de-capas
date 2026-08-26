@@ -86,7 +86,7 @@ const NOMES_TOOL: Record<string, string> = {
               <div class="passo-conteudo">
                 <strong>{{ passo.titulo }}</strong>
                 <p>{{ passo.comentario }}</p>
-                <span class="duracao">{{ passo.duracaoSegundos.toFixed(1) }}s</span>
+                <span v-if="passo.duracaoSegundos > 0" class="duracao">{{ passo.duracaoSegundos.toFixed(1) }}s</span>
               </div>
             </div>
 
@@ -132,6 +132,10 @@ const NOMES_TOOL: Record<string, string> = {
 .coluna-esquerda { flex: 1.2; }
 .coluna-direita { flex: 1; }
 
+.coluna-esquerda, .coluna-direita, .coluna-info {
+  min-width: 0;
+}
+
 h2 { margin: 0 0 12px; font-size: 22px; }
 h3 { margin: 0 0 12px; font-size: 16px; }
 
@@ -142,6 +146,12 @@ h3 { margin: 0 0 12px; font-size: 16px; }
   color: #666;
   font-size: 14px;
   margin-bottom: 20px;
+}
+
+.status-livro span:last-child {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .pill-status {

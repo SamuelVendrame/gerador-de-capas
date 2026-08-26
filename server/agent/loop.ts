@@ -95,7 +95,8 @@ export async function rodarAgente(
         }
 
         if (resposta.tool_calls && resposta.tool_calls.length > 0) {
-          const tituloEtapa = rotularEtapa(resposta.tool_calls?.[0]?.function.name ?? "", metricas);
+          const tituloEtapa = rotularEtapa(resposta.tool_calls[0]?.function.name ?? "", metricas);
+          const nomeToolBruto = resposta.tool_calls[0]?.function.name ?? "";
           const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
           const detalheAtual = detalhes[0];
 
@@ -125,6 +126,12 @@ export async function rodarAgente(
               caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
               ehCorrecao,
               nomeTool: detalheAtual?.nomeTool,
+            });
+
+            emitirEvento({
+              titulo: "Ferramenta executada",
+              comentario: `${nomeToolBruto} executada com sucesso.`,
+              duracaoSegundos: 0,
             });
           }
         } else {

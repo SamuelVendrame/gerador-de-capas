@@ -82,7 +82,8 @@
     font-weight: 700;
     line-height: 1.15;
     margin: 0;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
   }
 

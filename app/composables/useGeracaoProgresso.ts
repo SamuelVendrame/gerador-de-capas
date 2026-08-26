@@ -6,6 +6,7 @@ export type PassoProgresso = {
   duracaoSegundos: number;
   status: "sucesso" | "erro" | "limite";
   nomeTool?: string;
+  imagemPasso?: string; 
 };
 
 export function useGeracaoProgresso() {
@@ -68,11 +69,13 @@ export function useGeracaoProgresso() {
                   duracaoSegundos: dado.duracaoSegundos,
                   status: dado.status === "limite" ? "limite" : (dado.ehCorrecao ? "erro" : "sucesso"),
                   nomeTool: dado.nomeTool,
+                  imagemPasso: dado.caminhoImagem, 
                 });
 
                 if (dado.caminhoImagem) {
-                  caminhoImagem.value = dado.caminhoImagem;
+                  caminhoImagem.value = dado.caminhoImagem; 
                 }
+                
               } else if (dado.tipo === "concluido") {
                 finalizado.value = true;
                 sucesso.value = dado.sucesso;

@@ -167,10 +167,10 @@ async function selecionarLayout(layout: string) {
 .pill-cancelado { background: #ffebee; color: #c62828; }
 
 .titulo-tilt {
-  font-family: "Tilt Neon", sans-serif;
-  font-size: 26px;
-  margin: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
+
 .autor-tema { color: #666; margin: 0; font-size: 14px; }
 
 .resumo-processo, .decisoes-agente { background: white; padding: 16px; border-radius: 8px; }
