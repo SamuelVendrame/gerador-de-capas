@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GENEROS } from "~~/shared/schemasGeneros";
+import { GENEROS } from "~~/shared/generos";
 import { Heart, Terminal, Smile, TrendingUp, Star } from "lucide-vue-next";
 
 const genero = defineModel<string>("genero", { required: true });

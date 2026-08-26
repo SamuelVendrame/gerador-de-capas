@@ -8,7 +8,6 @@ export const schemaEventoProcesso = z.object({
   duracaoSegundos: z.number(),
 });
 
-
 export const schemaRegistroHistorico = z.object({
   id: z.string(),
   titulo: z.string(),

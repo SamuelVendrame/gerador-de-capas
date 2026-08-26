@@ -6,11 +6,10 @@
     "genero": "Técnico",
     "descricao": "adwadwadawd",
     "clima": "awdawdwd",
-    "status": "cancelado",
+    "status": "em_processamento",
     "criadoEm": "2026-08-26T17:38:55.379Z",
     "tentativasImagem": 1,
     "ajustesAgente": 0,
-    "duracaoSegundos": 7.878,
-    "motivoCancelamento": "Ocorreu um erro inesperado durante a geração. Tente novamente."
+    "duracaoSegundos": 10.178
   }
 ]

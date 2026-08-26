@@ -1,4 +1,4 @@
-import { GENEROS } from "../../shared/schemasGeneros";
+import { GENEROS } from "../../shared/generos";
 
 export function montarTema(dados: { genero: string; descricao: string; clima?: string }): string {
   const generoInfo = GENEROS.find((g) => g.valor === dados.genero);

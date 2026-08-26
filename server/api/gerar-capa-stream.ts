@@ -1,4 +1,4 @@
-import { schemaGeracaoCapa } from "../../shared/schemasGeneros";
+import { schemaGeracaoCapa } from "../../shared/schemaGeracaoCapa.ts";
 import { rodarAgente } from "../agent/loop";
 import { montarTema } from "../agent/contexto";
 import { extrairUltimaImagem } from "../agent/extrairImagem";

@@ -1,9 +1,20 @@
-import { chamarLLM } from "./llm";
 import type { Mensagem } from "../types/llm-types";
 import { TOOLS } from "./tools";
 import { executarRodadaTools } from "./executarRodadaTools";
 import { PROMPT_SISTEMA, montarPromptUsuario } from "./prompts";
-import { LIMITE_SEGURANCA_ITERACOES, LIMITE_TENTATIVAS_IMAGEM, type MetricasRodada, type EventoProgresso, type CallbackProgresso } from "../types/tools-types";
+import {
+  LIMITE_SEGURANCA_ITERACOES,
+  LIMITE_TENTATIVAS_IMAGEM,
+  type MetricasRodada,
+  type EventoProgresso,
+  type CallbackProgresso,
+} from "../types/tools-types";
+import { chamarLLM } from "./llm";
+
+const ROTULOS_TOOL: Record<string, string> = {
+  gerarImagem: "Gerando imagem",
+  renderizarCapa: "Montando a capa e capturando preview",
+};
 
 function extrairUltimaRespostaTexto(historico: Mensagem[]): string | undefined {
   for (let i = historico.length - 1; i >= 0; i--) {
@@ -21,37 +32,92 @@ function resumirComentario(texto: string): string {
   return primeiraFrase.length > 140 ? primeiraFrase.slice(0, 140) + "..." : primeiraFrase + ".";
 }
 
+function rotularEtapa(nomeTool: string, metricas: MetricasRodada): string {
+  if (nomeTool === "gerarImagem") {
+    return `Gerando imagem (tentativa ${metricas.tentativasImagem + 1}/${LIMITE_TENTATIVAS_IMAGEM})`;
+  }
+  return ROTULOS_TOOL[nomeTool] ?? nomeTool;
+}
+
 function montarResultado(
   sucesso: boolean,
   historico: Mensagem[],
   metricas: MetricasRodada,
   inicio: number,
-  motivoFalha?: string,
-  logEventos?: EventoProgresso[],
-  imagemFundoUrl?: string | null
+  logEventos: EventoProgresso[],
+  imagemFundoUrl: string | null,
+  motivoFalha?: string
 ) {
-  const duracaoSegundos = (Date.now() - inicio) / 1000;
   return {
-    sucesso, historico,
+    sucesso,
+    historico,
     tentativasImagem: metricas.tentativasImagem,
     ajustesAgente: metricas.ajustesAgente,
-    duracaoSegundos,
+    duracaoSegundos: (Date.now() - inicio) / 1000,
     layout: metricas.layoutFinal,
     fonte: metricas.fonteFinal,
-    logEventos: logEventos ?? [],
+    logEventos,
     imagemFundoUrl: imagemFundoUrl ?? undefined,
     ...(motivoFalha !== undefined ? { motivoFalha } : {}),
   };
 }
 
-function rotularEtapa(nomeTool: string, metricas: MetricasRodada): string {
-  if (nomeTool === "gerarImagem") {
-    return `Gerando imagem (tentativa ${metricas.tentativasImagem + 1}/${LIMITE_TENTATIVAS_IMAGEM})`;
+async function processarToolCalls(
+  resposta: Mensagem,
+  respostaTexto: string,
+  duracaoEtapa: number,
+  historico: Mensagem[],
+  ultimaImagemGeradaRef: { valor: string | null },
+  metricas: MetricasRodada,
+  emitirEvento: (evento: EventoProgresso) => void
+): Promise<void> {
+  const nomeToolBruto = resposta.tool_calls![0]?.function.name ?? "";
+  const tituloEtapa = rotularEtapa(nomeToolBruto, metricas);
+
+  const detalhes = await executarRodadaTools(
+    resposta.tool_calls!,
+    historico,
+    ultimaImagemGeradaRef,
+    metricas
+  );
+
+  const detalheAtual = detalhes[0];
+
+  if (detalheAtual?.recusada) {
+    emitirEvento({
+      titulo: `${tituloEtapa} — Limite atingido`,
+      comentario: detalheAtual.motivoRecusa ?? "Limite de tentativas atingido.",
+      duracaoSegundos: duracaoEtapa,
+      status: "limite",
+    });
+    return;
   }
-  if (nomeTool === "renderizarCapa") {
-    return "Montando a capa e capturando preview";
+
+  let comentarioFinal = resumirComentario(respostaTexto);
+  let ehCorrecao = false;
+
+  if (detalheAtual?.nomeTool === "gerarImagem") {
+    comentarioFinal = `Prompt: "${detalheAtual.argumentos.prompt}"`;
+    ehCorrecao = metricas.tentativasImagem > 1;
+  } else if (detalheAtual?.nomeTool === "renderizarCapa") {
+    comentarioFinal = `Layout: ${detalheAtual.argumentos.layout} · Fonte: ${detalheAtual.argumentos.fonte}`;
+    ehCorrecao = metricas.ajustesAgente > 1;
   }
-  return nomeTool;
+
+  emitirEvento({
+    titulo: tituloEtapa,
+    comentario: comentarioFinal,
+    duracaoSegundos: duracaoEtapa,
+    caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
+    ehCorrecao,
+    nomeTool: detalheAtual?.nomeTool,
+  });
+
+  emitirEvento({
+    titulo: "Ferramenta executada",
+    comentario: `${nomeToolBruto} executada com sucesso.`,
+    duracaoSegundos: 0,
+  });
 }
 
 export async function rodarAgente(
@@ -76,82 +142,94 @@ export async function rodarAgente(
   ];
 
   try {
-      while (iteracoes < LIMITE_SEGURANCA_ITERACOES) {
-        const inicioEtapa = Date.now();
-        const resposta = await chamarLLM(historico, TOOLS);
-        historico.push(resposta);
+    while (iteracoes < LIMITE_SEGURANCA_ITERACOES) {
+      const inicioEtapa = Date.now();
+      const resposta = await chamarLLM(historico, TOOLS);
+      historico.push(resposta);
 
-        const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
-        const duracaoEtapa = (Date.now() - inicioEtapa) / 1000;
+      const respostaTexto = typeof resposta.content === "string" ? resposta.content : "";
+      const duracaoEtapa = (Date.now() - inicioEtapa) / 1000;
 
-        if (respostaTexto.startsWith("APROVADO")) {
-          if (metricas.ajustesAgente === 0) {
-            historico.push({ role: "user", content: "Você ainda não chamou renderizarCapa. Chame antes de aprovar." });
-            continue;
-          }
-          const nota = respostaTexto.match(/Nota da autorrevisão:\s*([\d.,]+)/i)?.[1] ?? "—";
-          emitirEvento({ titulo: "Capa aprovada pelo agente", comentario: `Nota da autorrevisão: ${nota}`, duracaoSegundos: duracaoEtapa });
-          return montarResultado(true, historico, metricas, inicio, undefined, logEventos, ultimaImagemGeradaRef.valor);
+      if (respostaTexto.startsWith("APROVADO")) {
+        if (metricas.ajustesAgente === 0) {
+          historico.push({
+            role: "user",
+            content: "Você ainda não chamou renderizarCapa. Chame antes de aprovar.",
+          });
+          iteracoes++;
+          continue;
         }
 
-        if (resposta.tool_calls && resposta.tool_calls.length > 0) {
-          const tituloEtapa = rotularEtapa(resposta.tool_calls[0]?.function.name ?? "", metricas);
-          const nomeToolBruto = resposta.tool_calls[0]?.function.name ?? "";
-          const detalhes = await executarRodadaTools(resposta.tool_calls, historico, ultimaImagemGeradaRef, metricas);
-          const detalheAtual = detalhes[0];
+        const nota =
+          respostaTexto.match(/Nota da autorrevisão:\s*([\d.,]+)/i)?.[1] ?? "—";
 
-          if (detalheAtual?.recusada) {
-            emitirEvento({
-              titulo: `${tituloEtapa} — Limite atingido`,
-              comentario: detalheAtual.motivoRecusa ?? "Limite de tentativas atingido.",
-              duracaoSegundos: duracaoEtapa,
-              status: "limite",
-            });
-          } else {
-            let comentarioFinal = resumirComentario(respostaTexto);
-            let ehCorrecao = false;
+        emitirEvento({
+          titulo: "Capa aprovada pelo agente",
+          comentario: `Nota da autorrevisão: ${nota}`,
+          duracaoSegundos: duracaoEtapa,
+        });
 
-            if (detalheAtual?.nomeTool === "gerarImagem") {
-              comentarioFinal = `Prompt: "${detalheAtual.argumentos.prompt}"`;
-              ehCorrecao = metricas.tentativasImagem > 1;
-            } else if (detalheAtual?.nomeTool === "renderizarCapa") {
-              comentarioFinal = `Layout: ${detalheAtual.argumentos.layout} · Fonte: ${detalheAtual.argumentos.fonte}`;
-              ehCorrecao = metricas.ajustesAgente > 1;
-            }
+        return montarResultado(
+          true,
+          historico,
+          metricas,
+          inicio,
+          logEventos,
+          ultimaImagemGeradaRef.valor
+        );
+      }
 
-            emitirEvento({
-              titulo: tituloEtapa,
-              comentario: comentarioFinal,
-              duracaoSegundos: duracaoEtapa,
-              caminhoImagem: ultimaImagemGeradaRef.valor ?? undefined,
-              ehCorrecao,
-              nomeTool: detalheAtual?.nomeTool,
-            });
+      if (resposta.tool_calls && resposta.tool_calls.length > 1) {
+        historico.push({
+          role: "user",
+          content:
+            "Chame apenas uma ferramenta por vez. Aguarde o resultado antes de chamar a próxima.",
+        });
+        iteracoes++;
+        continue;
+      }
 
-            emitirEvento({
-              titulo: "Ferramenta executada",
-              comentario: `${nomeToolBruto} executada com sucesso.`,
-              duracaoSegundos: 0,
-            });
-          }
-        } else {
-            emitirEvento({ titulo: "Revisando o resultado", comentario: resumirComentario(respostaTexto), duracaoSegundos: duracaoEtapa });
+      if (resposta.tool_calls && resposta.tool_calls.length > 0) {
+        await processarToolCalls(
+          resposta,
+          respostaTexto,
+          duracaoEtapa,
+          historico,
+          ultimaImagemGeradaRef,
+          metricas,
+          emitirEvento
+        );
+      } else {
+        emitirEvento({
+          titulo: "Revisando o resultado",
+          comentario: resumirComentario(respostaTexto),
+          duracaoSegundos: duracaoEtapa,
+        });
       }
 
       iteracoes++;
     }
 
-    return montarResultado(false, historico, metricas, inicio, extrairUltimaRespostaTexto(historico), logEventos, ultimaImagemGeradaRef.valor);
+    return montarResultado(
+      false,
+      historico,
+      metricas,
+      inicio,
+      logEventos,
+      ultimaImagemGeradaRef.valor,
+      extrairUltimaRespostaTexto(historico)
+    );
   } catch (erro) {
-    const duracaoSegundos = (Date.now() - inicio) / 1000;
     const erroComMetricas = erro instanceof Error ? erro : new Error(String(erro));
+
     (erroComMetricas as any).metricasParciais = {
       tentativasImagem: metricas.tentativasImagem,
       ajustesAgente: metricas.ajustesAgente,
-      duracaoSegundos,
+      duracaoSegundos: (Date.now() - inicio) / 1000,
       layout: metricas.layoutFinal,
       fonte: metricas.fonteFinal,
     };
+
     throw erroComMetricas;
   }
 }
