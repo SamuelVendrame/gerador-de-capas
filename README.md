@@ -41,3 +41,7 @@ O projeto também não foi pensado pra escalar (histórico em arquivo simples, s
 ## Requisitos do PRD
 
 Todos os requisitos funcionais do documento foram implementados e testados. O único ponto de interpretação: o PRD descreve "layout" e "alinhamento" como dois parâmetros separados, mas o protótipo de referência já mostrava eles combinados em presets fixos, e eu segui o protótipo, que é a fonte visual oficial.
+
+## Considerações
+
+Bom, esse foi meu primeiro projeto realmente feito e terminado em Vue/Nuxt, então pode ser que hajam algumas misturas de responsabilidades ou um código meio ruim, mas acredito que tenha me dado uma boa experiência com a linguagem. Me diverti bastante fazendo o processo do toolcalling e no uso da IA pra manusear as imagens, foi bacana.

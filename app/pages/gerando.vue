@@ -183,8 +183,8 @@ h3 { margin: 0 0 12px; font-size: 16px; }
 .icone-limite { color: #c62828; }
 
 .passo-conteudo { flex: 1; }
-.passo-conteudo strong { display: block; font-size: 14px; margin-bottom: 4px; }
-.passo-conteudo p { color: #666; font-size: 13px; margin: 0 0 6px; line-height: 1.4; }
+.passo-conteudo strong { display: block; font-size: 14px; margin-bottom: 4px; overflow-wrap: anywhere; word-break: break-word; }
+.passo-conteudo p { color: #666; font-size: 13px; margin: 0 0 6px; line-height: 1.4; overflow-wrap: anywhere; word-break: break-word; }
 .duracao { color: #999; font-size: 12px; }
 
 .spinner-pequeno {
@@ -222,4 +222,22 @@ h3 { margin: 0 0 12px; font-size: 16px; }
 .barra-progresso { height: 6px; background: #eee; border-radius: 3px; margin: 16px 0; overflow: hidden; max-width: 300px; }
 .preenchido { height: 100%; background: var(--cor-primaria, #7c3aed); transition: width 0.3s; }
 .resultado-final { font-size: 14px; color: #333; }
+
+@media (max-width: 768px) {
+  .tela-progresso {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .coluna-esquerda,
+  .coluna-direita {
+    flex: 1;
+    width: 100%;
+  }
+
+  .preview-container,
+  .barra-progresso {
+    max-width: 100%;
+  }
+}
 </style>

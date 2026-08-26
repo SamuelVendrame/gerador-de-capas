@@ -1,5 +1,19 @@
 [
   {
+    "id": "20f6b26e-3c60-44b6-adb6-782af6231b91",
+    "titulo": "edeaf",
+    "autor": "eafaefae",
+    "genero": "Romance",
+    "descricao": "aefaef",
+    "clima": "awdawd",
+    "status": "cancelado",
+    "criadoEm": "2026-08-26T19:53:25.451Z",
+    "motivoCancelamento": "Ocorreu um erro inesperado durante a geração. Tente novamente.",
+    "tentativasImagem": 0,
+    "ajustesAgente": 0,
+    "duracaoSegundos": 10.66
+  },
+  {
     "id": "44520b2f-a16d-48c7-889e-e3bf240786ac",
     "titulo": "edeaf",
     "autor": "eafaefae",
