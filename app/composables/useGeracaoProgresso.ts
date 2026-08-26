@@ -14,7 +14,7 @@ export function useGeracaoProgresso() {
   const caminhoImagem = ref<string | null>(null);
   const motivo = ref<string | null>(null);
   const erroFatal = ref<string | null>(null);
-  const idGeracao = ref<string | null>(null); // 1) declarado no topo, junto dos outros refs
+  const idGeracao = ref<string | null>(null);
 
   async function iniciar(dados: any) {
     try {
@@ -43,43 +43,34 @@ export function useGeracaoProgresso() {
           if (!linha.startsWith("data: ")) continue;
 
           try {
-            const dado = JSON.parse(linha.replace("data: ", ""));
+              const dado = JSON.parse(linha.replace("data: ", ""));
 
-            if (dado.tipo === "iniciado") {
-              idGeracao.value = dado.id; // 2) captura o id assim que a geração começa
-            } else if (dado.tipo === "passo") {
-              const ultimoPasso = passos.value[passos.value.length - 1];
+              if (dado.tipo === "iniciado") {
+                idGeracao.value = dado.id;
+              } else if (dado.tipo === "passo") {
+                passos.value.push({
+                  titulo: dado.titulo,
+                  comentario: dado.comentario,
+                  duracaoSegundos: dado.duracaoSegundos,
+                  status: dado.ehCorrecao ? "erro" : "sucesso",
+                });
 
-              if (dado.caminhoImagem && ultimoPasso?.titulo === dado.titulo) {
-                caminhoImagem.value = dado.caminhoImagem;
-                continue;
+                if (dado.caminhoImagem) {
+                  caminhoImagem.value = dado.caminhoImagem;
+                }
+              } else if (dado.tipo === "concluido") {
+                finalizado.value = true;
+                sucesso.value = dado.sucesso;
+                caminhoImagem.value = dado.caminhoImagem ?? null;
+                motivo.value = dado.motivo ?? null;
+              } else if (dado.tipo === "erro") {
+                finalizado.value = true;
+                sucesso.value = false;
+                erroFatal.value = dado.mensagem;
               }
-
-              const passo: PassoProgresso = {
-                titulo: dado.titulo,
-                comentario: dado.comentario,
-                duracaoSegundos: dado.duracaoSegundos,
-                status: dado.ehCorrecao ? "erro" : "sucesso",
-              };
-
-              passos.value.push(passo);
-
-              if (dado.caminhoImagem) {
-                caminhoImagem.value = dado.caminhoImagem;
-              }
-            } else if (dado.tipo === "concluido") {
-              finalizado.value = true;
-              sucesso.value = dado.sucesso;
-              caminhoImagem.value = dado.caminhoImagem ?? null;
-              motivo.value = dado.motivo ?? null;
-            } else if (dado.tipo === "erro") {
-              finalizado.value = true;
-              sucesso.value = false;
-              erroFatal.value = dado.mensagem;
+            } catch (erroParse) {
+              console.error("Falha ao parsear evento SSE:", erroParse, linha);
             }
-          } catch (erroParse) {
-            console.error("Falha ao parsear evento SSE:", erroParse, linha);
-          }
         }
       }
     } catch (erro) {
@@ -89,5 +80,5 @@ export function useGeracaoProgresso() {
     }
   }
 
-  return { passos, finalizado, sucesso, caminhoImagem, motivo, erroFatal, idGeracao, iniciar }; // 3) idGeracao exposto no return
+  return { passos, finalizado, sucesso, caminhoImagem, motivo, erroFatal, idGeracao, iniciar };
 }
