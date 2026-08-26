@@ -9,7 +9,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ fechar: [] }>();
 
-const { baixarImagem, gerarVariacao, trocarLayout, registroSelecionado, ajustarInstrucoes } = useDetalheCapa();
+const { baixarImagem, gerarVariacao, trocarLayout, registroSelecionado, ajustarInstrucoes, baixarPdf } = useDetalheCapa();
 registroSelecionado.value = props.registro;
 
 watch(() => props.registro, (novo) => { registroSelecionado.value = novo; });
@@ -129,6 +129,7 @@ async function selecionarLayout(layout: string) {
 
         <div class="acoes">
           <button class="btn-acao" @click="baixarImagem">Baixar imagem</button>
+          <button class="btn-acao" @click="baixarPdf">Baixar PDF</button>
           <button class="btn-acao" @click="gerarVariacao">Gerar variação</button>
           <button class="btn-acao" @click="ajustarInstrucoes">Ajustar instruções</button>
         </div>

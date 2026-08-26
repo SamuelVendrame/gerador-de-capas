@@ -49,7 +49,7 @@ export function useDetalheCapa() {
     function ajustarInstrucoes() {
       if (!registroSelecionado.value) return;
       sessionStorage.setItem("dadosWizardPreenchido", JSON.stringify({
-        id: registroSelecionado.value.id, // <- novo
+        id: registroSelecionado.value.id, 
         titulo: registroSelecionado.value.titulo,
         autor: registroSelecionado.value.autor,
         genero: registroSelecionado.value.genero,
@@ -60,7 +60,26 @@ export function useDetalheCapa() {
       router.push("/");
     }
 
+    async function baixarPdf() {
+      if (!registroSelecionado.value?.caminhoImagem) return;
 
-   return { registroSelecionado, abrirDetalhe, fecharDetalhe, baixarImagem, gerarVariacao, trocarLayout, ajustarInstrucoes };
+      const blob = await $fetch("/api/gerar-pdf", {
+        method: "POST",
+        body: {
+          imagemBase64: registroSelecionado.value.caminhoImagem,
+          titulo: registroSelecionado.value.titulo,
+        },
+        responseType: "blob",
+      });
+
+      const url = URL.createObjectURL(blob as Blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${registroSelecionado.value.titulo}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+   return { registroSelecionado, abrirDetalhe, fecharDetalhe, baixarImagem, gerarVariacao, trocarLayout, ajustarInstrucoes, baixarPdf };
 
 }
