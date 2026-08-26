@@ -7,7 +7,6 @@ const emit = defineEmits<{ gerar: [] }>();
 
 <template>
   <div class="etapa">
-
     <div class="campo">
       <label for="clima">Preferências de clima (opcional)</label>
       <input id="clima" v-model="clima" type="text" placeholder="Pode deixar vazio — o agente decide sozinho." />
@@ -22,13 +21,8 @@ const emit = defineEmits<{ gerar: [] }>();
       </ul>
       <p class="nota">Depois da geração você pode trocar tipografia e layout com um clique e ver como fica.</p>
     </div>
-
-    <button class="btn-gerar" :disabled="gerando" @click="emit('gerar')">
-      {{ gerando ? "Gerando capa..." : "Gerar capa" }}
-    </button>
   </div>
 </template>
-
 <style scoped>
 .etapa { display: flex; flex-direction: column; gap: 16px; }
 .subtitulo { color: #666; font-size: 14px; margin: -8px 0 8px; }
