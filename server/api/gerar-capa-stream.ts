@@ -24,8 +24,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const dados = validacao.data;
-  const id = randomUUID();
-  await criarOuReiniciarRegistro(id, undefined, dados);
+  const idExistente = body.idExistente as string | undefined;
+  const id = idExistente ?? randomUUID();
+  await criarOuReiniciarRegistro(id, idExistente, dados);
 
   const enviarEvento = (dado: any) => {
     event.node.res.write(`data: ${JSON.stringify(dado)}\n\n`);

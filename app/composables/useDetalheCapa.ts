@@ -1,7 +1,10 @@
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import type { RegistroHistorico } from "~~/shared/schemaHistorico";
 
 export function useDetalheCapa() {
+  const router = useRouter();
+
   const registroSelecionado = ref<RegistroHistorico | null>(null);
 
   function abrirDetalhe(registro: RegistroHistorico) {
@@ -44,5 +47,22 @@ export function useDetalheCapa() {
     registroSelecionado.value = atualizado;
     }
 
-  return { registroSelecionado, abrirDetalhe, fecharDetalhe, baixarImagem, gerarVariacao, trocarLayout };
+
+    function ajustarInstrucoes() {
+      if (!registroSelecionado.value) return;
+      sessionStorage.setItem("dadosWizardPreenchido", JSON.stringify({
+        id: registroSelecionado.value.id, // <- novo
+        titulo: registroSelecionado.value.titulo,
+        autor: registroSelecionado.value.autor,
+        genero: registroSelecionado.value.genero,
+        descricao: registroSelecionado.value.descricao,
+        clima: registroSelecionado.value.clima,
+        etapaInicial: 4,
+      }));
+      router.push("/");
+    }
+
+
+   return { registroSelecionado, abrirDetalhe, fecharDetalhe, baixarImagem, gerarVariacao, trocarLayout, ajustarInstrucoes };
+
 }

@@ -1,18 +1,27 @@
 import { ref } from "vue";
-import { schemaEtapa1, schemaEtapa2, schemaEtapa3, schemaEtapa4, schemaGeracaoCapa } from "~~/shared/schemasGeneros";
 import { useRouter } from "vue-router";
+import { schemaEtapa1, schemaEtapa2, schemaEtapa3, schemaEtapa4, schemaGeracaoCapa } from "~~/shared/schemasGeneros";
 
 export function useWizardCapa() {
-  const router = useRouter()
-  const etapaAtual = ref(1);
+  const router = useRouter();
+
+  const dadosPreenchidos = (() => {
+    const salvo = sessionStorage.getItem("dadosWizardPreenchido");
+    if (!salvo) return null;
+    sessionStorage.removeItem("dadosWizardPreenchido");
+    return JSON.parse(salvo);
+  })();
+
+  const idExistente = ref<string | null>(dadosPreenchidos?.id ?? null);
+  const etapaAtual = ref(dadosPreenchidos?.etapaInicial ?? 1);
   const totalEtapas = 4;
   const erros = ref<Record<string, string>>({});
 
-  const titulo = ref("");
-  const autor = ref("");
-  const genero = ref("");
-  const descricao = ref("");
-  const clima = ref("");
+  const titulo = ref(dadosPreenchidos?.titulo ?? "");
+  const autor = ref(dadosPreenchidos?.autor ?? "");
+  const genero = ref(dadosPreenchidos?.genero ?? "");
+  const descricao = ref(dadosPreenchidos?.descricao ?? "");
+  const clima = ref(dadosPreenchidos?.clima ?? "");
 
   function validarEtapaAtual(): boolean {
     erros.value = {};
@@ -63,7 +72,10 @@ export function useWizardCapa() {
       return false;
     }
 
-    sessionStorage.setItem("dadosGeracaoCapa", JSON.stringify(validacaoCompleta.data));
+    sessionStorage.setItem("dadosGeracaoCapa", JSON.stringify({
+      ...validacaoCompleta.data,
+      idExistente: idExistente.value,
+    }));
     router.push("/gerando");
     return true;
   }

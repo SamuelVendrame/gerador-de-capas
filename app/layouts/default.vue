@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const totalHistorico = ref(0);
 
-onMounted(async () => {
+async function carregarTotal() {
   try {
     const registros = await $fetch("/api/historico");
     totalHistorico.value = registros.length;
   } catch (erro) {
     console.error("Erro ao carregar total do histórico:", erro);
   }
-});
+}
+
+onMounted(carregarTotal);
+watch(() => route.path, carregarTotal);
 </script>
 
 <template>
