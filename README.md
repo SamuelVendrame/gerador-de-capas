@@ -23,7 +23,7 @@ O diferencial não é "gerar uma imagem", mas sim o ciclo de auto-revisão: o ag
 ## Limitações conhecidas
 
 - A detecção de texto indevido na arte e a avaliação de composição dependem do julgamento do modelo de IA. Não há uma verificação por regras fixas por trás disso. O prompt reforça bastante contra esses erros, e funciona bem na maioria dos casos, mas não é 100% garantido (é uma característica de modelos gratuitos de visão, não uma falha de implementação).
-- IMPORTANTE: Não tente dar retry numa capa que foi cancelada enquanto há outra sendo gerada. Você será redirecionado para o carregamento da capa gerada atualmente (isso foi um tradeoff que eu optei por manter para conseguir entregar o projeto dentro dos dias que propus, mas é algo simples de resolver)
+- IMPORTANTE: Não tente dar retry numa capa que foi cancelada enquanto há outra sendo gerada. Você será redirecionado para o carregamento da capa gerada atualmente (isso foi um tradeoff que eu optei por manter para conseguir entregar o projeto dentro dos dias que propus, mas é algo simples de resolver) - fiz isso pensando no sistema para gerar uma capa por vez.
 - Acompanhar uma geração em andamento só funciona na mesma aba do navegador. Se você fecha a aba, o processo continua no servidor e o resultado aparece no histórico ao terminar, mas o passo a passo em tempo real se perde.
 - Alguns botões de ação (tentar novamente, gerar variação) ainda não têm proteção contra cliques duplos, diferente do botão principal de gerar capa, que já bloqueia isso se há uma geração sendo feita.
 - Não é bem uma 'limitação', é mais uma feature - mas quando você digita qualquer coisa pra ser gerada na capa (exemplo: 'FEWIFWEIFWF'), a IA vai se basear na temática enviada para gerar a imagem.
