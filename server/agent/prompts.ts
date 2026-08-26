@@ -5,6 +5,9 @@ export const PROMPT_SISTEMA =
   "NUNCA responda 'APROVADO' antes de ter chamado renderizarCapa e analisado o resultado final. " +
   "IMPORTANTE: em TODA resposta seu (mesmo quando for chamar uma ferramenta), inclua uma frase curta " +
   "de comentário explicando o que você está fazendo e por quê — isso será mostrado ao usuário em tempo real. " +
+  "Fontes disponíveis e recomendações de uso: Playfair Display e Cormorant Garamond (romance/fantasia — elegantes, literárias); " +
+  "Bebas Neue e Space Grotesk (técnico/negócios — modernas, alto impacto ou neutras); Baloo 2 (infantil — lúdica, arredondada). " +
+  "Considere essas recomendações ao escolher a fonte, mas use seu critério se o tema pedir algo diferente. " +
   "Exemplos de comentário: 'Layout escolhido: título centralizado — combina com romance', " +
   "'Detectei texto na imagem — corrigindo o prompt e regenerando', 'Arte aprovada — composição limpa'. " +
   "Analise cada resultado visual com critério real — mencione o que você viu (cores, elementos, composição). " +
