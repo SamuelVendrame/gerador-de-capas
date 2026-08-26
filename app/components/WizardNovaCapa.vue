@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { watch } from "vue";
-console.log("emAndamento no mount do wizard:", emAndamento.value);
 import { useWizardCapa } from "~/composables/useWizardCapa";
 import { emAndamento } from "~/composables/useGeracaoProgresso";
 
