@@ -2,6 +2,7 @@ import { schemaGeracaoCapa } from "../../shared/schemasGeneros";
 import { rodarAgente } from "../agent/loop";
 import { montarTema } from "../agent/contexto";
 import { extrairUltimaImagem } from "../agent/extrairImagem";
+import { traduzirErroParaUsuario } from "../agent/traduzirErro";
 import {
   criarOuReiniciarRegistro,
   registrarSucesso,
@@ -24,8 +25,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const dados = validacao.data;
-  const id = randomUUID();
-  await criarOuReiniciarRegistro(id, undefined, dados);
+  const idExistente = body.idExistente as string | undefined;
+  const id = idExistente ?? randomUUID();
+  await criarOuReiniciarRegistro(id, idExistente, dados);
 
   const enviarEvento = (dado: any) => {
     event.node.res.write(`data: ${JSON.stringify(dado)}\n\n`);
@@ -52,7 +54,8 @@ export default defineEventHandler(async (event) => {
     }
   } catch (erro) {
     await registrarErro(id, erro);
-    enviarEvento({ tipo: "erro", mensagem: erro instanceof Error ? erro.message : "Erro desconhecido" });
+    const mensagemTecnica = erro instanceof Error ? erro.message : "Erro desconhecido";
+    enviarEvento({ tipo: "erro", mensagem: traduzirErroParaUsuario(mensagemTecnica) });
   }
 
   event.node.res.end();

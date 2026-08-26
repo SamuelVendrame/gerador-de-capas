@@ -47,8 +47,9 @@ const SUBTITULOS_ETAPA: Record<number, string> = {
       </div>
 
       <div class="navegacao">
-        <button v-if="etapaAtual > 1" class="btn-voltar" @click="voltar">< Voltar</button>
-        <button v-if="etapaAtual < totalEtapas" class="btn-avancar" @click="avancar">Continuar ></button>
+        <button v-if="etapaAtual > 1" class="btn-voltar" @click="voltar">Voltar</button>
+        <button v-if="etapaAtual < totalEtapas" class="btn-avancar" @click="avancar">Avançar</button>
+        <button v-else class="btn-avancar" @click="gerarCapa">Gerar capa</button>
       </div>
     </div>
   </div>

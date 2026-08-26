@@ -1,5 +1,6 @@
 import { adicionarRegistro, atualizarRegistro } from "./historicoStore";
 import { parseAvaliacao } from "../agent/parseAvaliacao";
+import { traduzirErroParaUsuario } from "../agent/traduzirErro";
 
 export async function criarOuReiniciarRegistro(
   id: string,
@@ -30,7 +31,7 @@ export async function registrarSucesso(id: string, resultado: any, ultimaImagem:
 
   const avaliacao = parseAvaliacao(ultimaMensagemTexto);
 
-  await atualizarRegistro(id, {
+    await atualizarRegistro(id, {
     status: "concluido",
     caminhoImagem: ultimaImagem,
     layout: resultado.layout,
@@ -38,6 +39,8 @@ export async function registrarSucesso(id: string, resultado: any, ultimaImagem:
     tentativasImagem: resultado.tentativasImagem,
     ajustesAgente: resultado.ajustesAgente,
     duracaoSegundos: resultado.duracaoSegundos,
+    logProcesso: resultado.logEventos,
+    imagemFundoUrl: resultado.imagemFundoUrl,
     ...avaliacao,
   });
 }
@@ -56,9 +59,11 @@ export async function registrarFalha(id: string, resultado: any): Promise<void> 
 
 export async function registrarErro(id: string, erro: unknown): Promise<void> {
   const metricas = (erro as any).metricasParciais ?? {};
+  const mensagemTecnica = erro instanceof Error ? erro.message : "Erro desconhecido durante a geração.";
+
   await atualizarRegistro(id, {
     status: "cancelado",
-    motivoCancelamento: erro instanceof Error ? erro.message : "Erro desconhecido durante a geração.",
+    motivoCancelamento: traduzirErroParaUsuario(mensagemTecnica),
     ...metricas,
   });
 }

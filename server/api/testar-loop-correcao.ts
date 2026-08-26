@@ -18,7 +18,17 @@ export default defineEventHandler(async (event) => {
     },
     {
       role: "user",
-      content: `Gere uma capa para o livro "${dadosDoLivro.titulo}" de ${dadosDoLivro.autor}. Tema: ${dadosDoLivro.tema}. Use o layout "faixa".`,    },
+        content: [
+          {
+            type: "text",
+            text: "Aqui está o resultado de gerarImagem, analise: A imagem contém texto indesejado sobreposto. Você precisa gerar novamente sem texto na imagem.",
+          },
+          {
+            type: "image_url",
+            image_url: { url: "https://picsum.photos/1600/2400" },
+          },
+        ],
+      },
     {
       role: "assistant",
       content: null as any,

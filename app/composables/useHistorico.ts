@@ -1,7 +1,9 @@
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import type { RegistroHistorico } from "~~/shared/schemaHistorico";
 
 export function useHistorico() {
+  const router = useRouter();
   const registros = ref<RegistroHistorico[]>([]);
   const carregando = ref(true);
 
@@ -16,23 +18,16 @@ export function useHistorico() {
     }
   }
 
-  async function tentarNovamente(registro: RegistroHistorico) {
-    try {
-      await $fetch("/api/gerar-capa", {
-        method: "POST",
-        body: {
-          titulo: registro.titulo,
-          autor: registro.autor,
-          genero: registro.genero,
-          descricao: registro.descricao,
-          clima: registro.clima,
-          idExistente: registro.id,
-        },
-      });
-      await carregarHistorico();
-    } catch (erro) {
-      console.error("Erro ao tentar novamente:", erro);
-    }
+  function tentarNovamente(registro: RegistroHistorico) {
+    sessionStorage.setItem("dadosGeracaoCapa", JSON.stringify({
+      titulo: registro.titulo,
+      autor: registro.autor,
+      genero: registro.genero,
+      descricao: registro.descricao,
+      clima: registro.clima,
+      idExistente: registro.id, 
+    }));
+    router.push("/gerando");
   }
 
   return { registros, carregando, carregarHistorico, tentarNovamente };

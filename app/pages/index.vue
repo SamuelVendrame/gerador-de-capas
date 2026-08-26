@@ -1,59 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import PainelHistorico from "~/components/PainelHistorico.vue";
-
-const abaAtiva = ref<"nova" | "historico">("nova");
-const refHistorico = ref<InstanceType<typeof PainelHistorico> | null>(null);
-const totalHistorico = ref(0);
-
-async function carregarTotal() {
-  try {
-    const registros = await $fetch("/api/historico");
-    totalHistorico.value = registros.length;
-  } catch (erro) {
-    console.error("Erro ao carregar total do histórico:", erro);
-  }
-}
-
-onMounted(carregarTotal);
-
-function aoGerarCapa() {
-  carregarTotal();
-  refHistorico.value?.carregarHistorico();
-}
 </script>
 
 <template>
-  <div class="pagina">
-    <div class="card-central">
-      <header class="cabecalho">
-        <div class="logo-titulo">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-          </svg>
-          <h1>Gerador de <span class="destaque">Capas</span></h1>
-        </div>
-
-        <nav class="abas">
-          <button :class="{ ativa: abaAtiva === 'nova' }" @click="abaAtiva = 'nova'">Nova capa</button>
-          <button :class="{ ativa: abaAtiva === 'historico' }" @click="abaAtiva = 'historico'">
-            Histórico
-                <span v-if="totalHistorico > 0" class="badge">{{ totalHistorico }}</span>
-          </button>
-        </nav>
-      </header>
-
-      <hr class="divisor" />
-
-      <div class="conteudo">
-        <WizardNovaCapa v-if="abaAtiva === 'nova'" @capa-gerada="aoGerarCapa" />
-        <PainelHistorico v-else ref="refHistorico" />
-      </div>
-    </div>
-  </div>
+  <WizardNovaCapa />
 </template>
-
 <style scoped>
 
 * {
@@ -67,24 +17,6 @@ html,
 body {
   margin: 0;
   padding: 0;
-}
-
-.pagina {
-  min-height: 100vh;
-  width: 100%;
-  background: #fdf2f8;
-  padding: 40px 20px;
-  box-sizing: border-box;
-}
-
-.card-central {
-  width: 100%;
-  max-width: none;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
-
 }
 
 .cabecalho {

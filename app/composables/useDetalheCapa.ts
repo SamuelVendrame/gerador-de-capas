@@ -1,7 +1,10 @@
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import type { RegistroHistorico } from "~~/shared/schemaHistorico";
 
 export function useDetalheCapa() {
+  const router = useRouter();
+
   const registroSelecionado = ref<RegistroHistorico | null>(null);
 
   function abrirDetalhe(registro: RegistroHistorico) {
@@ -20,20 +23,18 @@ export function useDetalheCapa() {
     link.click();
   }
 
-  async function gerarVariacao() {
+  function gerarVariacao() {
     if (!registroSelecionado.value) return;
-    await $fetch("/api/gerar-capa", {
-      method: "POST",
-      body: {
-        titulo: registroSelecionado.value.titulo,
-        autor: registroSelecionado.value.autor,
-        genero: registroSelecionado.value.genero,
-        descricao: registroSelecionado.value.descricao,
-        clima: registroSelecionado.value.clima,
-      },
-    });
-    fecharDetalhe();
+    sessionStorage.setItem("dadosGeracaoCapa", JSON.stringify({
+      titulo: registroSelecionado.value.titulo,
+      autor: registroSelecionado.value.autor,
+      genero: registroSelecionado.value.genero,
+      descricao: registroSelecionado.value.descricao,
+      clima: registroSelecionado.value.clima,
+    }));
+    router.push("/gerando");
   }
+
 
     async function trocarLayout(novoLayout: string, novaFonte: string) {
     if (!registroSelecionado.value) return;
@@ -44,5 +45,41 @@ export function useDetalheCapa() {
     registroSelecionado.value = atualizado;
     }
 
-  return { registroSelecionado, abrirDetalhe, fecharDetalhe, baixarImagem, gerarVariacao, trocarLayout };
+
+    function ajustarInstrucoes() {
+      if (!registroSelecionado.value) return;
+      sessionStorage.setItem("dadosWizardPreenchido", JSON.stringify({
+        id: registroSelecionado.value.id, 
+        titulo: registroSelecionado.value.titulo,
+        autor: registroSelecionado.value.autor,
+        genero: registroSelecionado.value.genero,
+        descricao: registroSelecionado.value.descricao,
+        clima: registroSelecionado.value.clima,
+        etapaInicial: 4,
+      }));
+      router.push("/");
+    }
+
+    async function baixarPdf() {
+      if (!registroSelecionado.value?.caminhoImagem) return;
+
+      const blob = await $fetch("/api/gerar-pdf", {
+        method: "POST",
+        body: {
+          imagemBase64: registroSelecionado.value.caminhoImagem,
+          titulo: registroSelecionado.value.titulo,
+        },
+        responseType: "blob",
+      });
+
+      const url = URL.createObjectURL(blob as Blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${registroSelecionado.value.titulo}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+   return { registroSelecionado, abrirDetalhe, fecharDetalhe, baixarImagem, gerarVariacao, trocarLayout, ajustarInstrucoes, baixarPdf };
+
 }

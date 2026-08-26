@@ -2,6 +2,13 @@ import { z } from "zod";
 
 export const STATUS_GERACAO = ["em_processamento", "concluido", "cancelado"] as const;
 
+export const schemaEventoProcesso = z.object({
+  titulo: z.string(),
+  comentario: z.string(),
+  duracaoSegundos: z.number(),
+});
+
+
 export const schemaRegistroHistorico = z.object({
   id: z.string(),
   titulo: z.string(),
@@ -22,6 +29,8 @@ export const schemaRegistroHistorico = z.object({
   fonteMotivo: z.string().optional(),
   avaliacaoArte: z.string().optional(),
   consideracoesFinais: z.string().optional(),
+  logProcesso: z.array(schemaEventoProcesso).optional(),
+  imagemFundoUrl: z.string().optional(),
 });
 
 export type RegistroHistorico = z.infer<typeof schemaRegistroHistorico>;
