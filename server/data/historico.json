@@ -1,3 +1,16 @@
 [
-  
+  {
+    "id": "44520b2f-a16d-48c7-889e-e3bf240786ac",
+    "titulo": "edeaf",
+    "autor": "eafaefae",
+    "genero": "Romance",
+    "descricao": "aefaef",
+    "clima": "awdawd",
+    "status": "cancelado",
+    "criadoEm": "2026-08-26T19:46:06.030Z",
+    "motivoCancelamento": "Os modelos de IA gratuitos atingiram o limite de uso do dia. Tente novamente mais tarde, ou aguarde o limite resetar.",
+    "tentativasImagem": 0,
+    "ajustesAgente": 0,
+    "duracaoSegundos": 8.519
+  }
 ]
