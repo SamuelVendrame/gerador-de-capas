@@ -78,17 +78,17 @@ export async function executarRodadaTools(
     let resultado: string;
 
     if (call.function.name === "gerarImagem") {
-      metricas.tentativasImagem++;
-      resultado = await executarTool(call.function.name, args);
-      ultimaImagemGeradaRef.valor = resultado;
-      console.log(`[AGENTE] ✓ gerarImagem concluída (tentativa ${metricas.tentativasImagem}/${LIMITE_TENTATIVAS_IMAGEM})`);
+        metricas.tentativasImagem++;
+        resultado = await executarTool(call.function.name, args);
+        ultimaImagemGeradaRef.valor = resultado;
+        console.log(`[AGENTE] ✓ gerarImagem concluída (tentativa ${metricas.tentativasImagem}/${LIMITE_TENTATIVAS_IMAGEM})`);
     } else if (call.function.name === "renderizarCapa") {
-      metricas.ajustesAgente++;
-      metricas.layoutFinal = args.layout;
-      metricas.fonteFinal = args.fonte;
+        metricas.ajustesAgente++;
+        metricas.layoutFinal = args.layout;
+        metricas.fonteFinal = args.fonte;
       if (ultimaImagemGeradaRef.valor) args.imagemUrl = ultimaImagemGeradaRef.valor;
-      resultado = await executarTool(call.function.name, args);
-      console.log(`[AGENTE] ✓ renderizarCapa concluída (ajuste ${metricas.ajustesAgente}/${LIMITE_AJUSTES_RENDERIZACAO})`);
+        resultado = await executarTool(call.function.name, args);
+        console.log(`[AGENTE] ✓ renderizarCapa concluída (ajuste ${metricas.ajustesAgente}/${LIMITE_AJUSTES_RENDERIZACAO})`);
     } else {
       throw new Error(`Ferramenta desconhecida: ${call.function.name}`);
     }

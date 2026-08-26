@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useDetalheCapa } from "~/composables/useDetalheCapa";
-import { computed } from "vue";
-
+import { FONTES } from "~~/shared/fontes";
 
 const props = defineProps<{
   registro: any;
   mostrarVoltar?: boolean;
 }>();
-
-const eventosRelevantes = computed(() => {
-  return (registroSelecionado.value?.logProcesso ?? []).filter(
-    (e: any) => e.status === "erro" || e.status === "limite"
-  );
-});
 
 const emit = defineEmits<{ fechar: [] }>();
 
@@ -21,6 +14,12 @@ const { baixarImagem, gerarVariacao, trocarLayout, registroSelecionado, ajustarI
 registroSelecionado.value = props.registro;
 
 watch(() => props.registro, (novo) => { registroSelecionado.value = novo; });
+
+const eventosRelevantes = computed(() => {
+  return (registroSelecionado.value?.logProcesso ?? []).filter(
+    (e: any) => e.status === "erro" || e.status === "limite"
+  );
+});
 
 const novoLayout = ref(props.registro.layout ?? "");
 const novaFonte = ref(props.registro.fonte ?? "");
@@ -31,14 +30,6 @@ const LAYOUTS = [
   { valor: "rodape", label: "Rodapé" },
   { valor: "faixa", label: "Faixa" },
   { valor: "direita", label: "Alinhado à direita" },
-];
-
-const FONTES = [
-  { valor: "Playfair Display" },
-  { valor: "Cormorant Garamond" },
-  { valor: "Bebas Neue" },
-  { valor: "Space Grotesk" },
-  { valor: "Baloo 2" },
 ];
 
 async function selecionarFonte(fonte: string) {
