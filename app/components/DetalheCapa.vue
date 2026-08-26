@@ -84,23 +84,22 @@ async function selecionarLayout(layout: string) {
     </div>
 
     <div class="separador-vertical" />
-
-    <div class="bloco-ajuste">
-      <h3 class="titulo-ajuste">LAYOUT</h3>
-      <div class="opcoes-select">
-        <button
-          v-for="l in LAYOUTS"
-          :key="l.valor"
-          class="opcao-select"
-          :class="{ selecionado: novoLayout === l.valor }"
-          @click="selecionarLayout(l.valor)"
-        >
-          {{ l.label }}
-        </button>
+        <div class="bloco-ajuste">
+          <h3 class="titulo-ajuste">LAYOUT</h3>
+          <div class="opcoes-select">
+            <button
+              v-for="l in LAYOUTS"
+              :key="l.valor"
+              class="opcao-select"
+              :class="{ selecionado: novoLayout === l.valor }"
+              @click="selecionarLayout(l.valor)"
+            >
+              {{ l.label }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
         <div class="card-resumo">
           <h3 class="titulo-card">Resumo do processo</h3>

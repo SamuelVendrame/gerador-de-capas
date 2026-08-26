@@ -6,6 +6,7 @@ export function useWizardCapa() {
   const router = useRouter();
 
   const dadosPreenchidos = (() => {
+    if (typeof window === "undefined") return null; // proteção SSR
     const salvo = sessionStorage.getItem("dadosWizardPreenchido");
     if (!salvo) return null;
     sessionStorage.removeItem("dadosWizardPreenchido");
@@ -13,7 +14,7 @@ export function useWizardCapa() {
   })();
 
   const idExistente = ref<string | null>(dadosPreenchidos?.id ?? null);
-  const etapaAtual = ref(dadosPreenchidos?.etapaInicial ?? 1);
+  const etapaAtual = ref<number>(dadosPreenchidos?.etapaInicial ?? 1);
   const totalEtapas = 4;
   const erros = ref<Record<string, string>>({});
 

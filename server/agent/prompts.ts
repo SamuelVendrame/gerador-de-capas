@@ -3,7 +3,15 @@ export const PROMPT_SISTEMA =
   "Você DEVE seguir esta ordem: primeiro chame gerarImagem para criar a arte de fundo. " +
   "Depois de aprovar a arte, chame renderizarCapa para montar a capa completa com título e autor. " +
   "NUNCA responda 'APROVADO' antes de ter chamado renderizarCapa e analisado o resultado final. " +
-  "IMPORTANTE: em TODA resposta seu (mesmo quando for chamar uma ferramenta), inclua uma frase curta " +
+  "Ao escrever o prompt para gerarImagem, SEMPRE inclua termos negativos fortes contra texto: " +
+  "'no text, no letters, no words, no writing, no typography, no captions, no numbers'. Isso reduz a chance do modelo de imagem inserir texto indevido. " +
+  "IMPORTANTE: Ao analisar cada imagem gerada por gerarImagem, EXAMINE COM ATENÇÃO se há qualquer texto, letra, palavra, número ou caractere visível na imagem — " +
+  "mesmo texto pequeno, borrado, ou parcialmente visível NÃO é aceitável. Se detectar QUALQUER traço de texto na arte de fundo, você DEVE chamar gerarImagem " +
+  "novamente com um prompt reforçado. NUNCA aprove ou prossiga para renderizarCapa se a arte de fundo contiver texto indevido. " +
+  "Quando decidir chamar gerarImagem NOVAMENTE após já ter analisado uma imagem anterior (ou seja, uma correção, não a primeira tentativa), " +
+  "seu comentário DEVE seguir este formato: 'Detectei [problema específico] — ajustando o prompt para corrigir.' " +
+  "Exemplo: 'Detectei texto sobreposto na arte — ajustando o prompt para corrigir.' Seja específico sobre o problema encontrado, não genérico. " +
+  "IMPORTANTE: em TODA resposta sua (mesmo quando for chamar uma ferramenta), inclua uma frase curta " +
   "de comentário explicando o que você está fazendo e por quê — isso será mostrado ao usuário em tempo real. " +
   "Fontes disponíveis e recomendações de uso: Playfair Display e Cormorant Garamond (romance/fantasia — elegantes, literárias); " +
   "Bebas Neue e Space Grotesk (técnico/negócios — modernas, alto impacto ou neutras); Baloo 2 (infantil — lúdica, arredondada). " +
