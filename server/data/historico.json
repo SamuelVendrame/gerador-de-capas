@@ -1,3 +1,48 @@
 [
-  
+  {
+    "id": "7070756e-775f-430f-aab3-f8acdc1bcab4",
+    "titulo": "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",
+    "autor": "aa",
+    "genero": "Romance",
+    "descricao": "wadawdwaddaw",
+    "clima": "awdawddawd",
+    "status": "em_processamento",
+    "criadoEm": "2026-08-26T16:49:54.133Z"
+  },
+  {
+    "id": "572b0932-66f7-4db0-a529-3e0ac2425216",
+    "titulo": "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",
+    "autor": "aa",
+    "genero": "Romance",
+    "descricao": "wadawdwaddaw",
+    "clima": "awdawddawd",
+    "status": "em_processamento",
+    "criadoEm": "2026-08-26T16:42:45.482Z"
+  },
+  {
+    "id": "8ec50181-fd45-4f12-a478-d69b810e0df1",
+    "titulo": "TESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEE",
+    "autor": "TESTEEEEEE",
+    "genero": "Romance",
+    "descricao": "Rapaz andando de bicicleta, ao entardecer, numa rua livre em um parque, indo em direção ao sol.",
+    "clima": "Clima feliz e ensolarado.",
+    "status": "em_processamento",
+    "criadoEm": "2026-08-26T16:38:11.547Z"
+  },
+  {
+    "id": "b5923388-ce82-454c-a2e2-2e355af4a0b8",
+    "titulo": "TESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEETESTEEEEEE",
+    "autor": "TESTEEEEEE",
+    "genero": "Romance",
+    "descricao": "Rapaz andando de bicicleta, ao entardecer, numa rua livre em um parque, indo em direção ao sol.",
+    "clima": "Clima feliz e ensolarado.",
+    "status": "cancelado",
+    "criadoEm": "2026-08-26T16:36:47.184Z",
+    "motivoCancelamento": "Os modelos de IA gratuitos atingiram o limite de uso do dia. Tente novamente mais tarde, ou aguarde o limite resetar.",
+    "tentativasImagem": 1,
+    "ajustesAgente": 1,
+    "duracaoSegundos": 66.537,
+    "layout": "centralizado",
+    "fonte": "Playfair Display"
+  }
 ]

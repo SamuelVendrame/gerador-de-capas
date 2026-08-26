@@ -5,7 +5,7 @@ import { useGeracaoProgresso } from "~/composables/useGeracaoProgresso";
 
 const route = useRoute();
 const router = useRouter();
-const { passos, finalizado, sucesso, caminhoImagem, idGeracao, iniciar } = useGeracaoProgresso();
+const { passos, finalizado, sucesso, caminhoImagem, idGeracao, iniciar, emAndamento } = useGeracaoProgresso();
 const dadosLivro = ref<{ titulo?: string; genero?: string }>({});
 
 const idAcompanhando = route.query.id as string | undefined;
@@ -39,8 +39,15 @@ onMounted(() => {
   }
 });
 
-onUnmounted(() => {
-  if (intervaloPolling) clearInterval(intervaloPolling);
+onMounted(() => {
+  if (emAndamento.value || finalizado.value) {
+    const dados = JSON.parse(sessionStorage.getItem("dadosGeracaoCapa") ?? "{}");
+    dadosLivro.value = dados;
+  } else {
+    const dados = JSON.parse(sessionStorage.getItem("dadosGeracaoCapa") ?? "{}");
+    dadosLivro.value = dados;
+    iniciar(dados);
+  }
 });
 
 function verResultado() {
