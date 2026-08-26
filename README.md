@@ -37,8 +37,6 @@ O projeto também não foi pensado pra escalar, o foco foi cumprir bem o que o P
 
 O sistema também tem um teto geral de 12 iterações no loop do agente, separado do limite de 3 tentativas por etapa. Ele existe como proteção extra: garante que o processo sempre termina mesmo em algum cenário que os limites de 3 não cubram sozinhos (por exemplo, o modelo ficando preso só analisando em texto, sem chamar nenhuma ferramenta). Na prática, ele quase nunca é atingido, o fluxo normal sempre bate nos limites de 3 bem antes disso.
 
-Também considerei usar testes unitários e de integração para prever fluxo mas acredito que ficaria meio complexo e fora do escopo aplicar isso, ainda mais pensando no contexto da IA que é probabilística e dificultaria gerar testes em cima do output dela.
-
 ## Requisitos do PRD
 
 Todos os requisitos funcionais do documento foram implementados e testados. O único ponto de interpretação: o PRD descreve "layout" e "alinhamento" como dois parâmetros separados, mas o protótipo de referência já mostrava eles combinados em presets fixos, e eu segui o protótipo, que é a fonte visual oficial.
