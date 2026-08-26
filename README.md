@@ -6,20 +6,16 @@ Stack: Nuxt/Vue 3/TypeScript no front, Node.js no back, OpenRouter para o modelo
 
 ## Como rodar
 
-\```bash
 npm install
 npx playwright install chromium
 npm run dev
-\```
 
 Cria um `.env` na raiz com:
 
-\```
 OPENROUTER_API_KEY=sua_chave_aqui
 WAVESPEED_API_KEY=sua_chave_aqui
-\```
 
-Acessa em `http://localhost:3000`.
+Acessa em 'http://localhost:3000'.
 
 ## O que o projeto faz
 
