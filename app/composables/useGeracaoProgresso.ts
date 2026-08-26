@@ -26,7 +26,7 @@ async function verificarEstadoReal(id: string) {
     const registro = historico.find((r: any) => r.id === id);
     if (registro?.status === "concluido") {
       sucesso.value = true;
-      caminhoImagem.value = registro.caminhoImagem;
+      caminhoImagem.value = registro.caminhoImagem ?? null;
       erroFatal.value = null;
     }
   } catch {

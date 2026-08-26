@@ -318,4 +318,38 @@ async function selecionarLayout(layout: string) {
   background: var(--cor-primaria-clara, rgba(124,58,237,0.15));
   color: var(--cor-primaria, #7c3aed);
 }
+
+@media (max-width: 768px) {
+  .grid-detalhe {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .coluna-imagem {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  .colunas-ajuste {
+    flex-direction: column;
+  }
+
+  .separador-vertical {
+    width: 100%;
+    height: 1px;
+  }
+
+  .estatisticas {
+    justify-content: space-around;
+    gap: 12px;
+  }
+
+  .acoes {
+    flex-wrap: wrap;
+  }
+
+  .btn-acao {
+    flex: 1 1 calc(50% - 8px);
+  }
+}
 </style>
