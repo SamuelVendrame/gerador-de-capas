@@ -27,3 +27,4 @@ logs
 
 public/renders/
 server/data/historico.json
+server/data/historico
