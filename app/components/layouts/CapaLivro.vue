@@ -31,36 +31,36 @@
     }"
   >
     <div v-if="layout === 'centralizado'" class="conteudo centralizado">
-      <h1 class="titulo" :style="{ fontSize: tamanhoFonte }">{{ titulo }}</h1>
+      <h1 class="titulo" :style="{ fontSize: tamanhoFonte, fontFamily: fonte }">{{ titulo }}</h1>
       <div class="linha" />
-      <p class="autor">{{ autor.toUpperCase() }}</p>
+      <p class="autor" :style="{ fontFamily: fonte }">{{ autor.toUpperCase() }}</p>
     </div>
 
     <div v-else-if="layout === 'topoBase'" class="conteudo topoBase">
       <div class="bloco-topo">
-        <h1 class="titulo" :style="{ fontSize: tamanhoFonte }">{{ titulo }}</h1>
+        <h1 class="titulo" :style="{ fontSize: tamanhoFonte, fontFamily: fonte }">{{ titulo }}</h1>
         <div class="linha linha-curta" />
       </div>
-        <p class="autor">{{ autor.toUpperCase() }}</p>
+      <p class="autor" :style="{ fontFamily: fonte }">{{ autor.toUpperCase() }}</p>
     </div>
 
     <div v-else-if="layout === 'rodape'" class="conteudo rodape">
-      <h1 class="titulo" :style="{ fontSize: tamanhoFonte }">{{ titulo }}</h1>
+      <h1 class="titulo" :style="{ fontSize: tamanhoFonte, fontFamily: fonte }">{{ titulo }}</h1>
       <div class="linha" />
-      <p class="autor">{{ autor.toUpperCase() }}</p>
+      <p class="autor" :style="{ fontFamily: fonte }">{{ autor.toUpperCase() }}</p>
     </div>
 
     <div v-else-if="layout === 'faixa'" class="conteudo faixa">
       <div class="faixa-fundo">
-        <h1 class="titulo" :style="{ fontSize: tamanhoFonte }">{{ titulo }}</h1>
+        <h1 class="titulo" :style="{ fontSize: tamanhoFonte, fontFamily: fonte }">{{ titulo }}</h1>
       </div>
-        <p class="autor">{{ autor.toUpperCase() }}</p>
+      <p class="autor" :style="{ fontFamily: fonte }">{{ autor.toUpperCase() }}</p>
     </div>
 
     <div v-else-if="layout === 'direita'" class="conteudo direita">
-      <h1 class="titulo" :style="{ fontSize: tamanhoFonte }">{{ titulo }}</h1>
+      <h1 class="titulo" :style="{ fontSize: tamanhoFonte, fontFamily: fonte }">{{ titulo }}</h1>
       <div class="linha" />
-      <p class="autor">{{ autor.toUpperCase() }}</p>
+      <p class="autor" :style="{ fontFamily: fonte }">{{ autor.toUpperCase() }}</p>
     </div>
   </div>
 </template>
@@ -82,7 +82,8 @@
     font-weight: 700;
     line-height: 1.15;
     margin: 0;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
   }
 
@@ -130,10 +131,10 @@
 
   .faixa {
     width: 100%;
-    margin: auto 0;        /* centraliza o bloco inteiro verticalmente, sem esticar */
+    margin: auto 0;     
     display: flex;
     flex-direction: column;
-    align-items: center;   /* centraliza faixa-fundo e autor horizontalmente */
+    align-items: center;   
   }
 
   .faixa-fundo {

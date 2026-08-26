@@ -1,0 +1,35 @@
+import { z } from "zod";
+
+export const STATUS_GERACAO = ["em_processamento", "concluido", "cancelado"] as const;
+
+export const schemaEventoProcesso = z.object({
+  titulo: z.string(),
+  comentario: z.string(),
+  duracaoSegundos: z.number(),
+});
+
+export const schemaRegistroHistorico = z.object({
+  id: z.string(),
+  titulo: z.string(),
+  autor: z.string(),
+  genero: z.string(),
+  descricao: z.string(),
+  clima: z.string().optional(),
+  status: z.enum(STATUS_GERACAO),
+  motivoCancelamento: z.string().optional(),
+  caminhoImagem: z.string().optional(),
+  layout: z.string().optional(),
+  fonte: z.string().optional(),
+  tentativasImagem: z.number().optional(),
+  ajustesAgente: z.number().optional(),
+  duracaoSegundos: z.number().optional(),
+  criadoEm: z.string(),
+  layoutMotivo: z.string().optional(),
+  fonteMotivo: z.string().optional(),
+  avaliacaoArte: z.string().optional(),
+  consideracoesFinais: z.string().optional(),
+  logProcesso: z.array(schemaEventoProcesso).optional(),
+  imagemFundoUrl: z.string().optional(),
+});
+
+export type RegistroHistorico = z.infer<typeof schemaRegistroHistorico>;
